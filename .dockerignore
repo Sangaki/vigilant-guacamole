@@ -1,0 +1,4 @@
+./ClientApp/node_modules
+./.idea
+./.git
+./bin

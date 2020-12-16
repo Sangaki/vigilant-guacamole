@@ -1,5 +1,7 @@
 using just_do.Contexts;
+using just_do.Models.BaseModels;
 using just_do.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
@@ -7,8 +9,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NpgsqlTypes;
 
 namespace just_do
 {
@@ -29,11 +33,25 @@ namespace just_do
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "JustDo API Documentation", Version = "v1" });
             });
+
+            const string connectionString = "Host=ec2-52-208-138-246.eu-west-1.compute.amazonaws.com;Port=5432;Database=d158hirmftf7mq;Username=lodfkybiutsvox;Password=4575aa96c3765a4e74420ce60afe4761a011002c6bfce33a20344340916e4cbc;SslMode=Require;Trust Server Certificate=true";
             
             services.AddDbContext<ApplicationContext>();
             
-            services.AddMvcCore().AddAuthorization();
+            services.AddMvcCore();
+
+            services.AddIdentityServer()
+                .AddDeveloperSigningCredential()
+                .AddConfigurationStore(option =>
+                    option.ConfigureDbContext = builder => builder.UseNpgsql(connectionString))
+                .AddOperationalStore(option =>
+                    option.ConfigureDbContext = builder => builder.UseNpgsql(connectionString));
             
+            services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>();
+            
+            services.AddScoped<UserManager<User>>();
+            services.AddScoped<SignInManager<User>>();
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -42,12 +60,12 @@ namespace just_do
                     {
                         ValidateIssuer = false,
                         ValidateAudience = false,
-                        ValidateLifetime = false,
+                        ValidateLifetime = true,
                         IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
                         ValidateIssuerSigningKey = true,
                     };
                 });
-            
+            services.AddAuthorization();
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
         }
@@ -76,21 +94,16 @@ namespace just_do
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
-            app.UseAuthentication();
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
             
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller}/{action=Index}/{id?}");
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapDefaultControllerRoute(); });
 
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "ClientApp";
-
+            
                 if (env.IsDevelopment())
                 {
                     spa.UseReactDevelopmentServer(npmScript: "start");

@@ -3,83 +3,112 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using just_do.Contexts;
 using just_do.Models.ActionModels;
 using just_do.Models.BaseModels;
 using just_do.Options;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace just_do.Controllers
 {
     [Route("api/[controller]")]
     public class AuthController : Controller
     {
-
         private readonly ApplicationContext _context;
-
-        public AuthController(ApplicationContext context)
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
+        
+        public AuthController(
+            ApplicationContext context, 
+            UserManager<User> userManager, 
+            SignInManager<User> signInManager)
         {
             _context = context;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
-
+        
         [HttpPost, Route("login")]
-        public IActionResult Login([FromBody]LoginModel user)
+        public async Task<IActionResult> Login([FromBody]LoginModel user)
+        {
+            if (user == null)
+            {
+                return BadRequest("Invalid client request");
+            }
+            
+            Console.WriteLine(user.Email);
+            Console.WriteLine(user.Password);
+            var userEntity = await _context.Users
+                .FirstOrDefaultAsync(a => a.Email == user.Email);
+            if (userEntity == null)
+            {
+                return NotFound();
+            }
+            var passwordHasher = new PasswordHasher<User>();
+            var passwordVerificationResult = passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, user.Password);
+            
+            if (passwordVerificationResult == PasswordVerificationResult.Success)
+            {
+                var now = DateTime.UtcNow;
+                // создаем JWT-токен
+                var jwt = new JwtSecurityToken(
+                    notBefore: now,
+                    claims: GetIdentity(user.Email).Claims,
+                    expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
+                    signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+                var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+            
+                var response = new
+                {
+                    token = encodedJwt,
+                };
+                return Ok(response);
+            }
+
+            return BadRequest();
+        }
+        
+        [HttpPost, Route("register")]
+        public async Task<IActionResult> Register([FromBody]RegisterModel user)
         {
             if (user == null)
             {
                 return BadRequest("Invalid client request");
             }
 
-            var identity = GetIdentity(user.email, user.password);
+            var identityUser = new User { Email = user.Email, UserName = user.Email };
+            
+            var registerResult = await _userManager.CreateAsync(identityUser, user.Password);
+            
+            if (!registerResult.Succeeded) return BadRequest();
 
-            if (identity == null)
-            {
-                return BadRequest(new { errorText = "Invalid username or password." });
-            }
-
-            var now = DateTime.UtcNow;
-            // создаем JWT-токен
-            var jwt = new JwtSecurityToken(
-                    notBefore: now,
-                    claims: identity.Claims,
-                    expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
-                    signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-            var username = "";
-            foreach(var claim in identity.Claims.ToList())
-            {
-                if(claim.Type == "firstname")
-                {
-                    username = claim.Value;
-                }
-            }
-
-            var response = new
-            {
-                token = encodedJwt,
-                username = username
-            };
-
-            return Json(response);
+            return Ok();
         }
-
-        private ClaimsIdentity GetIdentity(string email, string password)
+        
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet, Route("/curdate")]
+        public OkObjectResult GetDate()
         {
-            User user = _context.Users.FirstOrDefault(x => x.email == email && x.password == password);
-            if (user != null)
+            return Ok(DateTime.Now.ToString());
+        }
+        private ClaimsIdentity GetIdentity(string email)
+        {
+            User person = _context.Users.FirstOrDefault(x => x.Email == email);
+            if (person != null)
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, user.email),
-                    new Claim("username", $"{user.firstname} {user.lastname}")
+                    new Claim(ClaimsIdentity.DefaultNameClaimType, person.Email),
+                    new Claim("sub", person.Id)
                 };
                 ClaimsIdentity claimsIdentity =
-                new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
-                    ClaimsIdentity.DefaultRoleClaimType);
+                    new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
+                        ClaimsIdentity.DefaultRoleClaimType);
                 return claimsIdentity;
             }
 

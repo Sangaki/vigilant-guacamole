@@ -1,5 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30621.155
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "just-do", "just-do.csproj", "{D7ED1121-E8CB-4231-8998-30517CC2EAD1}"
 EndProject
 Global
@@ -12,5 +15,11 @@ Global
 		{D7ED1121-E8CB-4231-8998-30517CC2EAD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7ED1121-E8CB-4231-8998-30517CC2EAD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7ED1121-E8CB-4231-8998-30517CC2EAD1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FE57DD17-1DAA-4DB5-89A2-5A7FE7E33D8F}
 	EndGlobalSection
 EndGlobal

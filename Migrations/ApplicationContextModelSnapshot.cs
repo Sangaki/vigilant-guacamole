@@ -19,9 +19,36 @@ namespace just_do.Migrations
                 .HasAnnotation("ProductVersion", "3.1.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            modelBuilder.Entity("just_do.Models.BaseModels.ToDoTask", b =>
+                {
+                    b.Property<string>("TaskId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("dateTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("priority")
+                        .HasColumnType("integer");
+
+                    b.HasKey("TaskId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Tasks");
+                });
+
             modelBuilder.Entity("just_do.Models.BaseModels.User", b =>
                 {
-                    b.Property<string>("Email")
+                    b.Property<string>("Id")
                         .HasColumnType("text");
 
                     b.Property<int>("AccessFailedCount")
@@ -30,11 +57,11 @@ namespace just_do.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .HasColumnType("text");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -66,9 +93,16 @@ namespace just_do.Migrations
                     b.Property<string>("UserName")
                         .HasColumnType("text");
 
-                    b.HasKey("Email");
+                    b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("just_do.Models.BaseModels.ToDoTask", b =>
+                {
+                    b.HasOne("just_do.Models.BaseModels.User", "User")
+                        .WithMany("Tasks")
+                        .HasForeignKey("UserId");
                 });
 #pragma warning restore 612, 618
         }

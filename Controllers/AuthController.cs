@@ -41,8 +41,6 @@ namespace just_do.Controllers
                 return BadRequest("Invalid client request");
             }
             
-            Console.WriteLine(user.Email);
-            Console.WriteLine(user.Password);
             var userEntity = await _context.Users
                 .FirstOrDefaultAsync(a => a.Email == user.Email);
             if (userEntity == null)
@@ -90,12 +88,6 @@ namespace just_do.Controllers
             return Ok();
         }
         
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        [HttpGet, Route("/curdate")]
-        public OkObjectResult GetDate()
-        {
-            return Ok(DateTime.Now.ToString());
-        }
         private ClaimsIdentity GetIdentity(string email)
         {
             User person = _context.Users.FirstOrDefault(x => x.Email == email);

@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using IdentityModel;
+using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using just_do.Contexts;
@@ -25,16 +29,18 @@ namespace just_do.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ToDoTask>>> GetTasks()
         {
-            return await _context.Tasks.ToListAsync();
+            var userId = HttpContext.User.Claims.First().Value;
+            return await _context.Tasks.Where(t => t.UserId == userId).ToListAsync();
         }
 
         // GET: api/Tasks/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ToDoTask>> GetToDoTask(string id)
         {
+            var userId = HttpContext.User.Claims.First().Value;
             var toDoTask = await _context.Tasks.FindAsync(id);
 
-            if (toDoTask == null)
+            if (toDoTask == null || toDoTask.UserId != userId)
             {
                 return NotFound();
             }
@@ -46,11 +52,14 @@ namespace just_do.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutToDoTask(string id, ToDoTask toDoTask)
         {
-            if (id != toDoTask.TaskId)
+            var userId = HttpContext.User.Claims.First().Value;
+            var toDoTaskInDb = await _context.Tasks.FindAsync(id);
+            
+            if (id != toDoTask.TaskId || toDoTaskInDb == null || toDoTaskInDb.UserId != userId)
             {
                 return BadRequest();
             }
-
+            
             _context.Entry(toDoTask).State = EntityState.Modified;
 
             try
@@ -76,6 +85,9 @@ namespace just_do.Controllers
         [HttpPost]
         public async Task<ActionResult<ToDoTask>> PostToDoTask(ToDoTask toDoTask)
         {
+            var userId = HttpContext.User.Claims.First().Value;
+            toDoTask.UserId = userId;
+            toDoTask.TaskId = Guid.NewGuid().ToString();
             _context.Tasks.Add(toDoTask);
             try
             {
@@ -101,7 +113,9 @@ namespace just_do.Controllers
         public async Task<ActionResult<ToDoTask>> DeleteToDoTask(string id)
         {
             var toDoTask = await _context.Tasks.FindAsync(id);
-            if (toDoTask == null)
+            var userId = HttpContext.User.Claims.First().Value;
+            
+            if (toDoTask == null || toDoTask.UserId != userId)
             {
                 return NotFound();
             }

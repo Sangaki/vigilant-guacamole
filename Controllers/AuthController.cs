@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using IdentityModel;
 using just_do.Contexts;
 using just_do.Models.ActionModels;
 using just_do.Models.BaseModels;
@@ -95,8 +96,8 @@ namespace just_do.Controllers
             {
                 var claims = new List<Claim>
                 {
+                    new Claim(JwtClaimTypes.Subject, person.Id),
                     new Claim(ClaimsIdentity.DefaultNameClaimType, person.Email),
-                    new Claim("sub", person.Id)
                 };
                 ClaimsIdentity claimsIdentity =
                     new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,

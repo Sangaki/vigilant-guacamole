@@ -1,0 +1,98 @@
+﻿.auth-page__wrapper {
+  height: 100%;
+  min-height: 100vh;
+  
+  & .auth-page__left-block {
+    background-image: url("/images/bg.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    position: relative;
+    
+    & .logo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+  
+  & .auth-page__right-block {
+    position: relative;
+    
+    & .auth-page__register-form-wrapper {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+      & h3.auth-page__header {
+        margin-bottom: 70px;
+        text-align: center;
+      }
+
+      & .auth-page__register-form {
+        .form-group {
+          margin-bottom: 10px;
+          padding-bottom: 20px;
+          text-align: center;
+          position: relative;
+        }
+        
+        & input[type="email"], input[type="password"] {
+          max-width: 500px;
+          width: 500px;
+          padding: 0 12px;
+          border: none;
+          border-bottom: 1px solid #B4B4B4;
+          border-radius: unset;
+          box-shadow: none;
+          appearance: none;
+          text-align: left;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+        }
+
+        & .form-error {
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          text-align: right;
+          font-size: 14px;
+          letter-spacing: 0;
+          color: #F24A3C;
+        }
+        
+        & .auth-page__forgot-link {
+          margin-top: 30px;
+        }
+        
+        button {
+          background: transparent linear-gradient(238deg, #2F80ED 0%, #56CCF2 100%) 0% 0% no-repeat padding-box;
+          border-radius: 26px;
+          width: 257px;
+          height: 47px;
+          border: none;
+          outline: none;
+          box-shadow: none;
+          
+          font-size: 24px;
+          line-height: 100%;
+        }
+      }
+    }
+    
+    & .auth-page__disclaimer {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+
+      & p {
+        text-align: center;
+      }
+    }
+  }
+}
+

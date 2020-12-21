@@ -6,7 +6,8 @@ import {RootStateI} from "../../store";
 import {RegisterStateI} from "./reducers";
 import {RegisterDispatch} from "./actions";
 import "./index.scss";
-import {PasswordConfirmErrors, PasswordErrors} from "../../shared/enums/errors";
+import {EmailErrors, PasswordConfirmErrors, PasswordErrors} from "../../shared/enums/errors";
+import {validateEmail} from "../../shared/validators/forms";
 
 const getRegisterState = (state: RootStateI): RegisterStateI => {
     return state.register;
@@ -20,11 +21,16 @@ export const Register: React.FunctionComponent<{}> = () => {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [emailErrors, setEmailErrors] = useState('');
     const [passwordErrors, setPasswordErrors] = useState('');
     const [passwordConfirmErrors, setPasswordConfirmErrors] = useState('');
     
     const initRegister = useCallback(() => {
         async function sendData() {
+            if (!validateEmail(login)) {
+                setPasswordErrors(EmailErrors['notExist']);
+                return;
+            }
             if (password.toLowerCase() === password || password.toLowerCase() === password) {
                 setPasswordErrors(PasswordErrors['capital']);
                 return;
@@ -71,6 +77,7 @@ export const Register: React.FunctionComponent<{}> = () => {
                                 onChange={
                                     (event: ChangeEvent<HTMLInputElement>) => { 
                                         setLogin(event.target.value);
+                                        setEmailErrors('');
                                     }
                                 }
                             />

@@ -8,3 +8,7 @@
 export enum PasswordConfirmErrors {
     'notMatch' = 'Password do not match',
 }
+
+export enum EmailErrors {
+    'notExist' = 'This address does not exist',
+}

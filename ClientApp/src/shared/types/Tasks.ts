@@ -6,3 +6,10 @@ export interface TaskI {
     dateTime: Date,
     userId: string,
 }
+
+export interface NewTaskI {
+    name: string,
+    description: string,
+    priority: number,
+    dateTime: Date,
+}

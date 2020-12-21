@@ -21,3 +21,21 @@ export const LoginDispatch = (loginData: LoginI) => async (dispatch: Dispatch<Lo
         });
     }
 };
+
+export const LogOutDispatch = () => async (dispatch: Dispatch<LoginDispatchTypes>) => {
+    try {
+        dispatch({
+            type: LOGIN_LOADING,
+        });
+
+        localStorage.removeItem('userToken');
+        dispatch({
+            type: LOGIN_SUCCESS,
+            payload: { token: '' },
+        });
+    } catch (error) {
+        dispatch({
+            type: LOGIN_FAIL,
+        });
+    }
+};

@@ -9,7 +9,7 @@ export const RegisterDispatch = (registerData: RegisterI) => async (dispatch: Di
             type: REGISTER_LOADING,
         });
         
-        const response = await registerRequest(registerData);
+        await registerRequest(registerData);
         
         dispatch({
             type: REGISTER_SUCCESS,

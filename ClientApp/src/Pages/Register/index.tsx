@@ -29,34 +29,39 @@ export const Register: React.FunctionComponent<{}> = () => {
         async function sendData() {
             if (!validateEmail(login)) {
                 setPasswordErrors(EmailErrors['notExist']);
-                return;
+                throw 'notExist';
             }
             if (password.toLowerCase() === password || password.toLowerCase() === password) {
                 setPasswordErrors(PasswordErrors['capital']);
-                return;
+                throw 'capital';
             }
             if (!password.match('[0-9]+')) {
                 setPasswordErrors(PasswordErrors['numbers']);
-                return;
+                throw 'numbers';
+            }
+            if (!password.match('(?=.*[!@#$%^&*])')) {
+                setPasswordErrors(PasswordErrors['specials']);
+                throw 'specials';
             }
             if (password.match(' ')) {
-                setPasswordErrors(PasswordErrors['numbers']);
-                return;
+                setPasswordErrors(PasswordErrors['space']);
+                throw 'space';
             }
             if (confirmPassword !== password) {
                 setPasswordConfirmErrors(PasswordConfirmErrors['notMatch']);
-                return;
+                throw 'notMatch';
             }
 
             await dispatch(RegisterDispatch({email:login, password: password}));
         }
+        
         sendData().then(() => {
             if (!registerState.loading && !registerState.error) {
                 history.push({
                     pathname: '/login',
                 });
-            }
-        });
+            } 
+        }).catch(e => console.log(e));
     }, [login, password, confirmPassword, dispatch, registerState, history]);
     
     return(
@@ -81,6 +86,7 @@ export const Register: React.FunctionComponent<{}> = () => {
                                     }
                                 }
                             />
+                            <span className="form-error">{emailErrors}</span>
                         </FormGroup>
                         <FormGroup>
                             <Input

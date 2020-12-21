@@ -1,4 +1,5 @@
 ./ClientApp/node_modules
+./ClientApp/package-lock.json
 ./.idea
 ./.git
 ./bin

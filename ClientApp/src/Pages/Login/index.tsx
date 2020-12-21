@@ -1,4 +1,4 @@
-﻿import React, {ChangeEvent, useCallback, useState} from "react";
+﻿import React, {ChangeEvent, useCallback, useEffect, useState} from "react";
 import {useHistory} from "react-router";
 import {useDispatch, useSelector} from "react-redux";
 import {Button, Form, FormGroup, Input} from "reactstrap";
@@ -18,10 +18,15 @@ export const Login: React.FunctionComponent<{}> = () => {
 
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
+    const [credentialsError, setCredentialsError] = useState(false);
     
     const initLogin = useCallback(() => {
-        dispatch(LoginDispatch({email:login, password: password}));
+        dispatch(LoginDispatch({email: login, password: password}));
     }, [login, password, dispatch]);
+    
+    useEffect(() => {
+        setCredentialsError(loginState.error);
+    }, [loginState.error, setCredentialsError]);
     
     return(
         <div className="row no-gutters auth-page__wrapper">
@@ -51,13 +56,19 @@ export const Login: React.FunctionComponent<{}> = () => {
                             />
                         </FormGroup>
                         <FormGroup>
-                            <a href="/" className="auth-page__forgot-link">Forgot password?</a>
+                            <span className="span-link auth-page__forgot-link">Forgot password?</span>
                         </FormGroup>
                         <FormGroup>
                             <Button onClick={initLogin}>Sign In</Button>
                         </FormGroup>
+                        <FormGroup className={!credentialsError ? 'hidden credential-error' : 'credential-error'}>
+                            <span>Wrong email or password. Please check credentials and try again</span>
+                        </FormGroup>
                         <FormGroup>
-                            <span className="span-link" onClick={() => history.push('/register')}>Sign Up</span>
+                            <span className="span-link" onClick={() => {
+                                setCredentialsError(false);
+                                history.push('/register');
+                            }}>Sign Up</span>
                         </FormGroup>
                     </Form>
                 </div>

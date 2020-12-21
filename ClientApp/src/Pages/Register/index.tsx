@@ -18,7 +18,7 @@ export const Register: React.FunctionComponent<{}> = () => {
     const dispatch = useDispatch();
     const registerState = useSelector(getRegisterState);
 
-    const [login, setLogin] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [emailErrors, setEmailErrors] = useState('');
@@ -27,9 +27,13 @@ export const Register: React.FunctionComponent<{}> = () => {
     
     const initRegister = useCallback(() => {
         async function sendData() {
-            if (!validateEmail(login)) {
-                setPasswordErrors(EmailErrors['notExist']);
+            if (!validateEmail(email)) {
+                setEmailErrors(EmailErrors['notExist']);
                 throw 'notExist';
+            }
+            if (password.length < 6) {
+                setPasswordErrors(PasswordErrors['length']);
+                throw 'numbers';
             }
             if (password.toLowerCase() === password || password.toLowerCase() === password) {
                 setPasswordErrors(PasswordErrors['capital']);
@@ -52,7 +56,7 @@ export const Register: React.FunctionComponent<{}> = () => {
                 throw 'notMatch';
             }
 
-            await dispatch(RegisterDispatch({email:login, password: password}));
+            await dispatch(RegisterDispatch({email:email, password: password}));
         }
         
         sendData().then(() => {
@@ -62,7 +66,7 @@ export const Register: React.FunctionComponent<{}> = () => {
                 });
             } 
         }).catch(e => console.log(e));
-    }, [login, password, confirmPassword, dispatch, registerState, history]);
+    }, [email, password, confirmPassword, dispatch, registerState, history]);
     
     return(
         <div className="row no-gutters auth-page__wrapper">
@@ -81,7 +85,7 @@ export const Register: React.FunctionComponent<{}> = () => {
                                 placeholder="E-mail"
                                 onChange={
                                     (event: ChangeEvent<HTMLInputElement>) => { 
-                                        setLogin(event.target.value);
+                                        setEmail(event.target.value);
                                         setEmailErrors('');
                                     }
                                 }

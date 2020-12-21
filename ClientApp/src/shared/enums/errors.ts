@@ -4,6 +4,7 @@
     'space' = 'The password should not contain spaces',
     'specials' = 'The password should contain at least one special character (@,!,?,.,:,; etc.)',
     'symbol' = 'The password must contain one or more numbers',
+    'length' = 'The password must be at least 6 characters',
 }
 
 export enum PasswordConfirmErrors {

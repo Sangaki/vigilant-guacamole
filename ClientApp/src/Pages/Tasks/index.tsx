@@ -88,16 +88,25 @@ export const Tasks: React.FunctionComponent<{}> = () => {
     
     useEffect(() => {
         const compiledDate = newTaskDate;
-        const time = newTaskTime.split(':');
-        compiledDate.setHours(Number(time[0]));
-        compiledDate.setMinutes(Number(time[1]));
-        setNewTaskCompiledDate(compiledDate);
+        if (newTaskTime) {
+            const time = newTaskTime.split(':');
+            compiledDate.setUTCHours(Number(time[0]));
+            compiledDate.setMinutes(Number(time[1]));
+            console.log(compiledDate);
+            setNewTaskCompiledDate(compiledDate);
+        }
     },[newTaskDate, newTaskTime, setNewTaskCompiledDate]);
     
     useEffect(() => {
         // TODO: Refactor for grouping by date
         // TODO: Refactor this to shared components with editable fields
-        setMappedTasks(tasksState.content.map(t => {
+        setMappedTasks(tasksState.content.sort((a, b) => {
+            if (a.dateTime <= b.dateTime) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }).map(t => {
             const date = getFormattedDateFromString(t.dateTime);
             const time = getFormattedTimeFromString(t.dateTime);
             return(

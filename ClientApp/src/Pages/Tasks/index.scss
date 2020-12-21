@@ -74,7 +74,7 @@
             position: absolute;
             bottom: 0;
             left: 0px;
-            right: calc(100%);
+            right: 100%;
             height: 2px;
             width: 0;
             border-radius: 2px;
@@ -173,7 +173,7 @@
       .tasks-container {
         display: flex;
         flex-direction: column;
-        max-height: calc(100% - 126px);
+        max-height: 100%;
         overflow: auto;
         
         .task-block {
@@ -181,7 +181,7 @@
           flex-direction: row;
           flex-wrap: nowrap;
           margin-top: 60px;
-          margin-bottom: 80px;
+          flex-shrink: 0;
           position: relative;
           
           .task-date {
@@ -285,9 +285,11 @@
     .task-create {
       flex: 0 1 126px;
       padding: 10px;
+      margin-top: 15px;
       flex-direction: row;
       flex-wrap: wrap;
       position: relative;
+      box-shadow: 0 -5px 5px -5px #434242;
       
       input, input:focus, input:active {
         outline: none;

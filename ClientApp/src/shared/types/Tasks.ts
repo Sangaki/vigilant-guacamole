@@ -3,7 +3,7 @@ export interface TaskI {
     name: string,
     description: string,
     priority: number,
-    dateTime: Date,
+    dateTime: string,
     userId: string,
 }
 

@@ -1,0 +1,33 @@
+.task-fields {
+  .task-header.edit {
+    .non-edit-header {
+      display: none;
+    }
+
+    .edit-header-input {
+      display: block;
+    }
+  }
+
+  .task-header {
+    .edit-header-input {
+      display: none;
+    }
+  }
+
+  .task-description.edit {
+    .non-edit-description {
+      display: none;
+    }
+
+    .edit-description-input {
+      display: block;
+    }
+  }
+
+  .task-description {
+    .edit-description-input {
+      display: none;
+    }
+  }
+}

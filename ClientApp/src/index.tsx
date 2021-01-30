@@ -7,10 +7,10 @@ import * as serviceWorker from './serviceWorker';
 import './index.scss';
 
 ReactDOM.render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>,
-    document.getElementById('root'),
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root'),
 );
 
 serviceWorker.unregister();

@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using IdentityModel;
-using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using just_do.Contexts;
 using just_do.Models.BaseModels;
 using Microsoft.AspNetCore.Authorization;
+using just_do.Enums;
 
 namespace just_do.Controllers
 {
@@ -27,10 +25,17 @@ namespace just_do.Controllers
 
         // GET: api/Tasks
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ToDoTask>>> GetTasks()
+        public async Task<ActionResult<IEnumerable<ToDoTask>>> GetTasks(TaskPriority? taskPriority)
         {
             var userId = HttpContext.User.Claims.First().Value;
-            return await _context.Tasks.Where(t => t.UserId == userId).ToListAsync();
+            if (taskPriority != null)
+            {
+                return await _context.Tasks.Where(t => t.UserId == userId && t.priority == taskPriority).ToListAsync();
+            } 
+            else
+            {
+                return await _context.Tasks.Where(t => t.UserId == userId).ToListAsync();
+            }
         }
 
         // GET: api/Tasks/5

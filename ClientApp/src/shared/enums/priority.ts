@@ -1,6 +1,6 @@
 ﻿export enum Priority {
-    'Neutral priority',
-    'Normal priority',
-    'Important priority',
-    'Urgently priority',
+  'Neutral priority',
+  'Normal priority',
+  'Important priority',
+  'Urgently priority',
 }

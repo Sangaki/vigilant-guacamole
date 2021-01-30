@@ -5,16 +5,16 @@ export const TASKS_FAIL = 'TASKS_FAIL';
 export const TASKS_SUCCESS = 'TASKS_SUCCESS';
 
 export interface TasksLoading {
-    type: typeof TASKS_LOADING;
+  type: typeof TASKS_LOADING;
 }
 
 export interface TasksSuccess {
-    type: typeof TASKS_SUCCESS;
-    payload: TaskI[];
+  type: typeof TASKS_SUCCESS;
+  payload: TaskI[];
 }
 
 export interface TasksFail {
-    type: typeof TASKS_FAIL;
+  type: typeof TASKS_FAIL;
 }
 
 export type TasksDispatchTypes = TasksLoading | TasksSuccess | TasksFail;

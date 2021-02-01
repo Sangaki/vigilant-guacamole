@@ -21,19 +21,6 @@
         "args": "none"
       }
     ],
-    "@typescript-eslint/no-unused-vars": [
-        "warn",
-      {
-        "vars": "all",
-        "args": "none"
-      }
-    ],
-    "@typescript-eslint/no-explicit-any": [
-        "error",
-      {
-        "ignoreRestArgs": true
-      }
-    ],
     "max-len": [
         "warn",
       {
@@ -49,7 +36,6 @@
         "allowForLoopAfterthoughts": true
       }
     ],
-    "react/jsx-key": "error",
     "import/no-extraneous-dependencies": [
         "error",
       {
@@ -76,9 +62,25 @@
       }
     ],
     "no-shadow": "off",
-    "@typescript-eslint/no-shadow": "error",
+    "@typescript-eslint/no-shadow": "off",
+    "no-use-before-define": "off",
+    "@typescript-eslint/no-use-before-define": ["error"],
+    "@typescript-eslint/no-explicit-any": [
+      "error",
+      {
+        "ignoreRestArgs": true
+      }
+    ],
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "args": "none"
+      }
+    ],
     "jsx-a11y/interactive-supports-focus": "off",
     "import/prefer-default-export": "off",
+    "react/jsx-key": "error",
     "react/jsx-props-no-spreading": "off",
     "react/jsx-boolean-value": "off",
     "react/prop-types": "off",

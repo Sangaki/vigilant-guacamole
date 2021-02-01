@@ -1,15 +1,17 @@
-import React, { useCallback, useState } from 'react';
-import { TaskI } from '../../shared/types/Tasks';
-import { Priority } from '../../shared/enums/priority';
-import { getFormattedTimeFromString } from '../../shared/helpers/date';
+import React, { ChangeEvent, useCallback, useState } from 'react';
+import { TaskI } from 'src/shared/types/Tasks';
+import { Priority } from 'src/shared/enums/priority';
+import { getFormattedTimeFromString } from 'src/shared/helpers/date';
 import './index.scss';
 
 interface Props {
   task: TaskI;
+  onUpdate: (updatedTask: TaskI) => void,
+  onCompleteTask: (id: string) => void,
 }
 
 export const EditableTask: React.FunctionComponent<Props> = (props) => {
-  const { task } = props;
+  const { task, onUpdate, onCompleteTask } = props;
 
   const [editHeader, setEditHeader] = useState(false);
   const [newHeader, setNewHeader] = useState(task.name);
@@ -18,60 +20,44 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
 
   const taskTime = getFormattedTimeFromString(task.dateTime);
 
-  const updateHeader = useCallback(() => {
+  const updateTask = useCallback(() => {
+    const updatedTask: TaskI = {
+      ...task,
+      name: newHeader,
+      description: newDescription,
+
+    };
     setEditHeader(false);
-  }, [setEditHeader]);
-
-  const onHeaderInputChange = useCallback((e) => {
-    setNewHeader(e.target.value);
-    if (e.keyCode === 13) {
-      setEditHeader(false);
-    }
-  }, [setNewHeader, setEditHeader]);
-
-  const updateDescription = useCallback(() => {
     setEditDescription(false);
-  }, [setEditDescription]);
-
-  const onDescriptionInputChange = useCallback((e) => {
-    setNewDescription(e.target.value);
-    if (e.keyCode === 13) {
-      setEditDescription(false);
-    }
-  }, [setNewDescription, setEditDescription]);
-
-  const customHeaderListener = useCallback(() => {
-    setEditHeader(false);
-    updateHeader();
-    document.removeEventListener('focusout', customHeaderListener);
-  }, [setEditHeader, updateHeader]);
+    onUpdate(updatedTask);
+  }, [newHeader, newDescription, onUpdate, task]);
 
   const startEditHeader = useCallback(() => {
     setEditHeader(true);
     setTimeout(() => {
       return document.getElementById(`header_${task.taskId}`)?.focus();
     }, 200);
-    document.addEventListener('focusout', customHeaderListener);
-  }, [setEditHeader, customHeaderListener, task.taskId]);
-
-  const customDescriptionListener = useCallback(() => {
-    setEditDescription(false);
-    updateDescription();
-    document.removeEventListener('focusout', customDescriptionListener);
-  }, [setEditDescription, updateDescription]);
+  }, [setEditHeader, task.taskId]);
 
   const startEditDescription = useCallback(() => {
     setEditDescription(true);
     setTimeout(() => {
       return document.getElementById(`description_${task.taskId}`)?.focus();
     }, 200);
-    document.addEventListener('focusout', customDescriptionListener);
-  }, [setEditDescription, customDescriptionListener, task.taskId]);
+  }, [setEditDescription, task.taskId]);
+
+  const confirmTaskComplete = useCallback(() => {
+    onCompleteTask(task.taskId);
+  }, [onCompleteTask, task.taskId]);
 
   return (
     <div className="task-block">
       <div className="task-confirm">
-        <input type="checkbox" />
+        <input
+          type="checkbox"
+          checked={false}
+          onChange={confirmTaskComplete}
+        />
       </div>
       <div className="task-fields">
         <div className={`task-header ${editHeader ? 'edit' : ''}`}>
@@ -80,14 +66,15 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
             onClick={startEditHeader}
             role="button"
             onKeyDown={() => {}}
-          >{task.name}
+          >{newHeader || task.name}
           </span>
           <input
             id={`header_${task.taskId}`}
             className="edit-header-input"
             type="text"
             defaultValue={newHeader}
-            onKeyDown={onHeaderInputChange}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setNewHeader(event.target.value)}
+            onBlur={updateTask}
           />
         </div>
         <div className={`task-description ${editDescription ? 'edit' : ''}`}>
@@ -96,14 +83,15 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
             onClick={startEditDescription}
             role="button"
             onKeyDown={() => {}}
-          >{task.description || 'Enter description...'}
+          >{newDescription || task.description || 'Enter description...'}
           </span>
           <input
             id={`description_${task.taskId}`}
             className="edit-description-input"
             type="text"
             defaultValue={newDescription}
-            onKeyDown={onDescriptionInputChange}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setNewDescription(event.target.value)}
+            onBlur={updateTask}
           />
         </div>
         <div className={`task-priority priority-${task.priority}`}>

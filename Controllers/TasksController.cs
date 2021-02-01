@@ -58,7 +58,7 @@ namespace just_do.Controllers
         public async Task<IActionResult> PutToDoTask(string id, ToDoTask toDoTask)
         {
             var userId = HttpContext.User.Claims.First().Value;
-            var toDoTaskInDb = await _context.Tasks.FindAsync(id);
+            var toDoTaskInDb = await _context.Tasks.AsNoTracking().FirstOrDefaultAsync(x => x.TaskId == id);
             
             if (id != toDoTask.TaskId || toDoTaskInDb == null || toDoTaskInDb.UserId != userId)
             {
@@ -83,7 +83,7 @@ namespace just_do.Controllers
                 }
             }
 
-            return NoContent();
+            return CreatedAtAction("GetToDoTask", new { id = toDoTask.TaskId }, toDoTask);
         }
 
         // POST: api/Tasks

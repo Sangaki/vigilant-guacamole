@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { TaskI } from '../../shared/types/Tasks';
+import { GroupedTasksByDateI, groupTasksByDate } from 'src/shared/helpers/tasks';
+import { TaskI } from 'src/shared/types/Tasks';
 import { EditableTask } from '../EditableTask';
-import { GroupedTasksByDateI, groupTasksByDate } from '../../shared/helpers/tasks';
 import './index.scss';
 
 interface Props {
   tasks: TaskI[],
+  onTaskUpdate: (updatedTask: TaskI) => void,
+  onCompleteTask: (id: string) => void,
 }
 
 export const TasksContainer: React.FunctionComponent<Props> = (props) => {
-  const { tasks } = props;
+  const { tasks, onTaskUpdate, onCompleteTask } = props;
 
   const [groupedTasks, setGroupedTasks] = useState<GroupedTasksByDateI>();
 
@@ -17,7 +19,6 @@ export const TasksContainer: React.FunctionComponent<Props> = (props) => {
     const gr = groupTasksByDate(tasks);
     setGroupedTasks(gr);
   }, [tasks]);
-
 
   return (
     <div className="tasks-container">
@@ -29,7 +30,12 @@ export const TasksContainer: React.FunctionComponent<Props> = (props) => {
             </div>
             {
                 groupedTasks[gt].map(t => {
-                  return <EditableTask task={t} key={t.taskId} />;
+                  return <EditableTask
+                    task={t}
+                    key={t.taskId}
+                    onUpdate={onTaskUpdate}
+                    onCompleteTask={onCompleteTask}
+                  />;
                 })
             }
           </div>);

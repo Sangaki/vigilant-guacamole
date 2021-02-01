@@ -1,28 +1,35 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
-import { Button, Collapse, Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
+import {
+  Button,
+  Collapse,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+  Modal,
+  ModalBody, ModalFooter,
+  ModalHeader
+} from 'reactstrap';
 import DatePicker from 'react-date-picker';
 import TimePicker from 'react-time-picker';
-import { RootStateI } from '../../store';
-import { TasksStateI } from './reducers';
-import { createTask, getTasks } from './actions';
-import { LogOutDispatch } from '../Login/actions';
-import { Priority } from '../../shared/enums/priority';
-import { NewTaskI, TaskI } from '../../shared/types/Tasks';
-import { TasksContainer } from '../../Components/TasksContainer';
+import { RootStateI } from 'src/store';
+import { Priority } from 'src/shared/enums/priority';
+import { NewTaskI, TaskI } from 'src/shared/types/Tasks';
+import { TasksContainer } from 'src/Components/TasksContainer';
+import { logoutUser } from '../Login/reducer';
+import { completeTask, createNewTask, fetchTasksWithFilter, updateTask } from './reducer';
 import './index.scss';
 
-const getTasksState = (state: RootStateI): TasksStateI => {
-  return state.tasks;
-};
+const tasksSelector = (store: RootStateI): TaskI[] => store.tasks.tasks;
 
 const prioritiesAsArray = Object.values(Priority).slice(0, Object.keys(Priority).length / 2);
 
 export const Tasks: React.FunctionComponent = () => {
   const dispatch = useDispatch();
   const history = useHistory();
-  const tasksState = useSelector(getTasksState);
+  const tasksState = useSelector(tasksSelector);
   const [mappedTasks, setMappedTasks] = useState<TaskI[]>([]);
     
   const [collapseSidebar, setCollapseSidebar] = useState(true);
@@ -40,12 +47,16 @@ export const Tasks: React.FunctionComponent = () => {
     
   const [newTaskHeaderError, setNewTaskHeaderError] = useState(false);
 
+  const [completeModal, setCompleteModal] = useState(false);
+  const [completingTaskId, setCompletingTaskId] = useState('');
+  const toggleModal = () => setCompleteModal(!completeModal);
+
   const toggleSidebar = () => setCollapseSidebar(!collapseSidebar);
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleNewTaskPriority = () => setNewTaskPriorityOpen(!newTaskPriorityOpen);
     
   const signOut = useCallback(() => {
-    dispatch(LogOutDispatch());
+    dispatch(logoutUser());
     history.push('/login');
   }, [dispatch, history]);
     
@@ -62,27 +73,47 @@ export const Tasks: React.FunctionComponent = () => {
       setNewTaskHeaderError(true);
       return;
     }
-        
+
     const newTask: NewTaskI = {
       name: newTaskHeader,
       description: newTaskDescription || '',
       dateTime: newTaskCompiledDate,
       priority: newTaskPriority === -1 ? 0 : newTaskPriority,
     };
-        
-    dispatch(createTask(newTask));
+
+    dispatch(createNewTask(newTask));
   }, [
-    dispatch, 
+    dispatch,
     newTaskHeader,
     newTaskDescription,
     newTaskPriority,
     newTaskCompiledDate,
     setNewTaskHeaderError,
   ]);
-    
+
+  const onTaskUpdate = useCallback((updatedTask: TaskI) => {
+    dispatch(updateTask(updatedTask));
+  }, [dispatch]);
+
+  const onTaskComplete = useCallback((id: string) => {
+    setCompletingTaskId(id);
+    toggleModal();
+  }, [dispatch, toggleModal]);
+
+  const onTaskCompleteConfirm = useCallback(() => {
+    toggleModal();
+    dispatch(completeTask(completingTaskId));
+    setCompletingTaskId('');
+  }, [dispatch, toggleModal]);
+
+  const onTaskCompleteCancel = useCallback(() => {
+    toggleModal();
+    setCompletingTaskId('');
+  }, [dispatch, toggleModal]);
+
   useEffect(() => {
-    dispatch(getTasks(selectedFilter));
-  }, [dispatch, tasksState.content.length, selectedFilter]);
+    dispatch(fetchTasksWithFilter(selectedFilter));
+  }, [dispatch, selectedFilter]);
     
   useEffect(() => {
     const compiledDate = newTaskDate;
@@ -93,16 +124,15 @@ export const Tasks: React.FunctionComponent = () => {
       setNewTaskCompiledDate(compiledDate);
     }
   }, [newTaskDate, newTaskTime, setNewTaskCompiledDate]);
-    
+
   useEffect(() => {
-    setMappedTasks(tasksState.content.sort((a, b) => {
+    setMappedTasks(tasksState.slice().sort((a, b) => {
       if (a.dateTime <= b.dateTime) {
         return -1;
       } 
       return 1;
-            
     }));
-  }, [tasksState.content]);
+  }, [tasksState]);
 
   return (
     <div className="tasks-wrapper">
@@ -162,7 +192,11 @@ export const Tasks: React.FunctionComponent = () => {
                   </DropdownMenu>
                 </Dropdown>
               </div>
-              <TasksContainer tasks={mappedTasks} />
+              <TasksContainer
+                tasks={mappedTasks}
+                onTaskUpdate={onTaskUpdate}
+                onCompleteTask={onTaskComplete}
+              />
             </div>
             <div className="task-create">
               <input 
@@ -186,7 +220,7 @@ export const Tasks: React.FunctionComponent = () => {
                 onChange={onTimeChange}
                 value={newTaskTime}
               />
-              <Dropdown isOpen={newTaskPriorityOpen}>
+              <Dropdown isOpen={newTaskPriorityOpen} toggle={() => {}}>
                 <DropdownToggle onClick={toggleNewTaskPriority}>{newTaskPriority === -1 ? 'Priority' : Priority[newTaskPriority]}</DropdownToggle>
                 <DropdownMenu>
                   <DropdownItem onClick={() => {
@@ -223,6 +257,18 @@ export const Tasks: React.FunctionComponent = () => {
             </div>
           </div>
         </div>
+      </div>
+      <div>
+        <Modal isOpen={completeModal} toggle={toggleModal}>
+          <ModalHeader toggle={toggleModal}>Close this task?</ModalHeader>
+          <ModalBody>
+            This action cannot be undone.
+          </ModalBody>
+          <ModalFooter>
+            <Button color="primary" onClick={onTaskCompleteConfirm}>Yes, i'm sure!</Button>{' '}
+            <Button color="secondary" onClick={onTaskCompleteCancel}>Cancel</Button>
+          </ModalFooter>
+        </Modal>
       </div>
     </div>
   );

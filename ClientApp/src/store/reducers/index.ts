@@ -1,11 +1,11 @@
-import { combineReducers } from 'redux';
-import tasksReducer from '../../Pages/Tasks/reducers';
-import loginReducer from '../../Pages/Login/reducers';
-import registerReducer from '../../Pages/Register/reducers';
+import { combineReducers } from '@reduxjs/toolkit';
+import tasksReducer from 'src/Pages/Tasks/reducer';
+import loginReducer from 'src/Pages/Login/reducer';
+import registerReducer from 'src/Pages/Register/reducers';
 
 const rootReducer = combineReducers({
-  tasks: tasksReducer,
-  login: loginReducer,
+  tasks: tasksReducer.reducer,
+  login: loginReducer.reducer,
   register: registerReducer,
 });
 

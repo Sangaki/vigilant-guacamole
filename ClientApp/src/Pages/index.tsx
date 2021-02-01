@@ -4,16 +4,14 @@ import { useSelector } from 'react-redux';
 import { Tasks } from './Tasks';
 import { Login } from './Login';
 import { RootStateI } from '../store';
-import { LoginStateI } from './Login/reducers';
 import { Register } from './Register';
+import { LoginResponseI } from '../api/auth';
 
-const getLoginState = (state: RootStateI): LoginStateI => {
-  return state.login;
-};
+const loginSelector = (store: RootStateI): LoginResponseI => store.login;
 
 export function AppRouter() {
-  const loginState = useSelector(getLoginState);
-  const loggedIn = loginState.content.token;
+  const loginState = useSelector(loginSelector);
+  const loggedIn = loginState.token;
 
   return (
     <div>

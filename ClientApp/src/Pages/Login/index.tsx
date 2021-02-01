@@ -1,32 +1,25 @@
-﻿import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
+﻿import React, { ChangeEvent, useCallback, useState } from 'react';
 import { useHistory } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Form, FormGroup, Input } from 'reactstrap';
-import { RootStateI } from '../../store';
-import { LoginStateI } from './reducers';
-import { LoginDispatch } from './actions';
+import { RootStateI } from 'src/store';
+import { loginUser } from './reducer';
 import './index.scss';
 
-const getLoginState = (state: RootStateI): LoginStateI => {
-  return state.login;
-};
+const loginErrorSelector = (store: RootStateI): string => store.login.error;
 
 export const Login: React.FunctionComponent<{}> = () => {
   const history = useHistory();
   const dispatch = useDispatch();
-  const loginState = useSelector(getLoginState);
+  const loginErrorState = useSelector(loginErrorSelector);
 
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
-  const [credentialsError, setCredentialsError] = useState(false);
+  const [credentialsError, setCredentialsError] = useState(loginErrorState);
     
   const initLogin = useCallback(() => {
-    dispatch(LoginDispatch({ email: login, password }));
+    dispatch(loginUser({ email: login, password }));
   }, [login, password, dispatch]);
-    
-  useEffect(() => {
-    setCredentialsError(loginState.error);
-  }, [loginState.error, setCredentialsError]);
     
   return (
     <div className="row no-gutters auth-page__wrapper">
@@ -68,7 +61,7 @@ export const Login: React.FunctionComponent<{}> = () => {
               <span
                 className="span-link"
                 onClick={() => {
-                  setCredentialsError(false);
+                  setCredentialsError('');
                   history.push('/register');
                 }}
                 role="button"

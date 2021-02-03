@@ -58,7 +58,7 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
 
   useEffect(() => {
     updateTask();
-  }, [newPriority]);
+  }, [newPriority, updateTask]);
 
   return (
     <div className="task-block">

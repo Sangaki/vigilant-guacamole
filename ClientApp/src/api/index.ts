@@ -1,29 +1,50 @@
 import axios from 'axios';
 import { JsonWebTokenI, TokenDtoI } from 'src/shared/types/Login';
-import { updateTokenRequest } from './auth';
+
+let isRefreshing = false;
 
 const config = axios.create({
   baseURL: '/api',
   timeout: 10000,
 });
 
-config.interceptors.request.use(function (config) {
-  const tokenExp = localStorage.getItem('expires');
-  const refreshToken = localStorage.getItem('refreshToken');
-  if (tokenExp && refreshToken !== null) {
-    const nowDate = new Date();
-    const tokenExpDate = new Date(parseInt(tokenExp, 10) * 1000 + nowDate.getTimezoneOffset() * 60000);
-
-    if (tokenExpDate < nowDate) {
-      const refreshTokenM:TokenDtoI = {
-        token: refreshToken,
-      };
-      updateTokenRequest(refreshTokenM).then((resp) => {
-        setToken(resp.data);
-      }).catch((err) => {
-        console.log(err);
+config.interceptors.response.use((response) => {
+  return response;
+}, (error) => {
+  const originalRequest = error.config;
+  if (error.response.status === 401) {
+    if (isRefreshing) {
+      return new Promise(() => {}).then(token => {
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        return axios(originalRequest);
+      }).catch(err => {
+        return Promise.reject(err);
       });
     }
+
+    // eslint-disable-next-line no-underscore-dangle
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    const refreshToken = localStorage.getItem('refreshToken');
+    const userId = localStorage.getItem('userId');
+    const refreshTokenM: TokenDtoI = {
+      token: refreshToken!!,
+      userId: userId!!,
+    };
+
+    return new Promise((resolve, reject) => {
+      axios.post('/api/auth/tokens/refresh', refreshTokenM, originalRequest)
+        .then((resp) => {
+          setToken(resp.data);
+          originalRequest.headers.Authorization = `Bearer ${resp.data.accessToken}`;
+          resolve(axios(originalRequest));
+        })
+        .catch((err) => {
+          reject(err);
+        })
+        .finally(() => { isRefreshing = false; });
+    });
   }
   return config;
 });
@@ -41,5 +62,6 @@ export function setToken(jwtSet: JsonWebTokenI) {
   localStorage.setItem('accessToken', jwtSet.accessToken);
   localStorage.setItem('refreshToken', jwtSet.refreshToken);
   localStorage.setItem('expires', jwtSet.expires.toString());
+  localStorage.setItem('userId', jwtSet.userId);
   config.defaults.headers.common.Authorization = `Bearer ${jwtSet.accessToken}`;
 }

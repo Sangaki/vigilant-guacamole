@@ -1,6 +1,6 @@
-import { createAction, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { setToken } from 'src/api';
-import { loginRequest, LoginResponseI } from 'src/api/auth';
+import { loginRequest, LoginResponseI, signoutRequest } from 'src/api/auth';
 import { LoginI } from 'src/shared/types/Login';
 
 interface LoginReducerStateI {
@@ -13,13 +13,6 @@ const loginInitialState: LoginReducerStateI = {
   error: '',
 };
 
-export const logoutUser = createAction(
-  'login/userLogOut',
-  () => {
-    return { payload: { ...loginInitialState } };
-  }
-);
-
 export const loginUser = createAsyncThunk(
   'login/userLogIn',
   async (loginData: LoginI): Promise<LoginResponseI> => {
@@ -28,15 +21,17 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+export const logoutUser = createAsyncThunk(
+  'login/userLogOut',
+  async (): Promise<void> => {
+    await signoutRequest();
+  }
+);
+
 const loginSlice = createSlice({
   name: 'login',
   initialState: loginInitialState,
-  reducers: {
-    logout(state, ) {
-      // eslint-disable-next-line no-param-reassign
-      state = loginInitialState;
-    },
-  },
+  reducers: {},
   extraReducers: builder => {
     builder.addCase(loginUser.fulfilled, (state, action: PayloadAction<LoginResponseI>) => {
       setToken(action.payload);
@@ -47,7 +42,15 @@ const loginSlice = createSlice({
       // eslint-disable-next-line no-param-reassign
       state.error = 'Bad request';
     });
-  },
+    builder.addCase(logoutUser.fulfilled, (state) => {
+      // eslint-disable-next-line no-param-reassign
+      state = loginInitialState;
+      localStorage.removeItem('userId');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('expires');
+    });
+  }
 });
 
 export default loginSlice;

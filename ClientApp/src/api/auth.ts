@@ -6,6 +6,7 @@ export interface LoginResponseI {
   accessToken: string,
   refreshToken: string,
   expires: Date,
+  userId: string,
 }
 
 export function loginRequest(loginData: LoginI): Promise<AxiosResponse<LoginResponseI>> {

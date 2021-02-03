@@ -14,7 +14,7 @@ namespace just_do.Services
 {
     public interface IJwtHandler
     {
-        Models.JsonWebToken Create(User person);
+        JsonWebToken Create(User person);
     }
     public class JwtHandler : IJwtHandler
     {
@@ -48,7 +48,8 @@ namespace just_do.Services
             return new JsonWebToken
             {
                 AccessToken = token,
-                Expires = exp
+                Expires = exp,
+                userId = person.Id
             };
         }
         private ClaimsIdentity GetIdentity(User person)

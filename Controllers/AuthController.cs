@@ -73,8 +73,7 @@ namespace just_do.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<JsonWebToken>> RefreshAccessToken([FromBody] TokenDto tokenDto)
         {
-            var userId = HttpContext.User.Claims.First().Value;
-            var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == userId);
+            var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == tokenDto.userId);
             return user == null ? BadRequest() : Ok(_accountService.RefreshAccessToken(tokenDto.token, user));
         }
 

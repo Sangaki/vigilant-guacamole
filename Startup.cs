@@ -12,7 +12,11 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using NpgsqlTypes;
+using just_do.Models;
+using just_do.Middlewares;
+using Microsoft.AspNetCore.Http;
+using just_do.Services;
+using System;
 
 namespace just_do
 {
@@ -28,7 +32,6 @@ namespace just_do
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "JustDo API Documentation", Version = "v1" });
@@ -47,19 +50,34 @@ namespace just_do
             services.AddDbContext<ApplicationContext>();
             
             services.AddMvcCore();
-
             services.AddIdentityServer()
                 .AddDeveloperSigningCredential()
                 .AddConfigurationStore(option =>
                     option.ConfigureDbContext = builder => builder.UseNpgsql(connectionString))
                 .AddOperationalStore(option =>
                     option.ConfigureDbContext = builder => builder.UseNpgsql(connectionString));
-            
+
             services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>();
-            
+
             services.AddScoped<UserManager<User>>();
             services.AddScoped<SignInManager<User>>();
 
+            //jwt scope
+            services.AddSingleton<IAccountService, AccountService>();
+            services.AddSingleton<IJwtHandler, JwtHandler>();
+            services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
+            services.AddTransient<TokenManagerMiddleware>();
+            services.AddTransient<ITokenManager, TokenManager>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddDistributedRedisCache(r =>
+            {
+                r.Configuration = Configuration["redis:connectionString"];
+            });
+
+
+            var jwtSection = Configuration.GetSection("jwt");
+            var jwtOptions = new JwtOptions();
+            jwtSection.Bind(jwtOptions);
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -68,11 +86,16 @@ namespace just_do
                     {
                         ValidateIssuer = false,
                         ValidateAudience = false,
-                        ValidateLifetime = false,
+                        ValidateLifetime = true,
                         IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
                         ValidateIssuerSigningKey = true,
+                        ClockSkew = TimeSpan.Zero,
                     };
                 });
+            services.Configure<JwtOptions>(jwtSection);
+            // end jwt scope
+
+            services.AddControllersWithViews();
             services.AddAuthorization();
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
@@ -98,14 +121,15 @@ namespace just_do
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "JustDo API Documentation");
             });
-            
+
+            app.UseMiddleware<TokenManagerMiddleware>();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            
+
             app.UseEndpoints(endpoints => { endpoints.MapDefaultControllerRoute(); });
 
             app.UseSpa(spa =>

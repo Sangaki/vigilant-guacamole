@@ -1,47 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using IdentityModel;
 using just_do.Contexts;
+using just_do.Middlewares;
+using just_do.Models;
 using just_do.Models.ActionModels;
 using just_do.Models.BaseModels;
-using just_do.Options;
+using just_do.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace just_do.Controllers
 {
     [Route("api/[controller]")]
-    public class AuthController : Controller
+    [ApiController]
+    public class AuthController : ControllerBase
     {
         private readonly ApplicationContext _context;
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
-        
+        private readonly IAccountService _accountService;
+        private readonly ITokenManager _tokenManager;
+
         public AuthController(
-            ApplicationContext context, 
-            UserManager<User> userManager, 
-            SignInManager<User> signInManager)
+            ApplicationContext context,
+            IAccountService accountService,
+            ITokenManager tokenManager)
         {
             _context = context;
-            _userManager = userManager;
-            _signInManager = signInManager;
+            _accountService = accountService;
+            _tokenManager = tokenManager;
         }
-        
-        [HttpPost, Route("login")]
-        public async Task<IActionResult> Login([FromBody]LoginModel user)
+
+        [HttpPost("sign-up")]
+        [AllowAnonymous]
+        public IActionResult SignUp([FromBody] RegisterModel request)
+        {
+            _accountService.SignUp(request.Email, request.Password);
+
+            return NoContent();
+        }
+
+        [HttpPost("sign-in")]
+        [AllowAnonymous]
+        public async Task<ActionResult<JsonWebToken>> SignInAsync([FromBody] LoginModel user)
         {
             if (user == null)
             {
                 return BadRequest("Invalid client request");
             }
-            
+
             var userEntity = await _context.Users
                 .FirstOrDefaultAsync(a => a.Email == user.Email);
             if (userEntity == null)
@@ -50,62 +60,30 @@ namespace just_do.Controllers
             }
             var passwordHasher = new PasswordHasher<User>();
             var passwordVerificationResult = passwordHasher.VerifyHashedPassword(userEntity, userEntity.PasswordHash, user.Password);
-            
+
             if (passwordVerificationResult == PasswordVerificationResult.Success)
             {
-                var now = DateTime.UtcNow;
-                // создаем JWT-токен
-                var jwt = new JwtSecurityToken(
-                    notBefore: now,
-                    claims: GetIdentity(user.Email).Claims,
-                    expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
-                    signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-                var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-            
-                var response = new
-                {
-                    token = encodedJwt,
-                };
-                return Ok(response);
+                return Ok(_accountService.SignIn(userEntity));
             }
 
             return BadRequest();
         }
-        
-        [HttpPost, Route("register")]
-        public async Task<IActionResult> Register([FromBody]RegisterModel user)
+
+        [HttpPost("tokens/refresh")]
+        [AllowAnonymous]
+        public async Task<ActionResult<JsonWebToken>> RefreshAccessToken([FromBody] TokenDto tokenDto)
         {
-            if (user == null)
-            {
-                return BadRequest("Invalid client request");
-            }
-
-            var identityUser = new User { Email = user.Email, UserName = user.Email };
-            
-            var registerResult = await _userManager.CreateAsync(identityUser, user.Password);
-            
-            if (!registerResult.Succeeded) return BadRequest();
-
-            return Ok();
+            var userId = HttpContext.User.Claims.First().Value;
+            var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == userId);
+            return user == null ? BadRequest() : Ok(_accountService.RefreshAccessToken(tokenDto.token, user));
         }
-        
-        private ClaimsIdentity GetIdentity(string email)
-        {
-            User person = _context.Users.FirstOrDefault(x => x.Email == email);
-            if (person != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(JwtClaimTypes.Subject, person.Id),
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, person.Email),
-                };
-                ClaimsIdentity claimsIdentity =
-                    new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
-                        ClaimsIdentity.DefaultRoleClaimType);
-                return claimsIdentity;
-            }
 
-            return null;
+        [HttpPost("tokens/cancel")]
+        public async Task<IActionResult> CancelAccessToken()
+        {
+            await _tokenManager.DeactivateCurrentAsync();
+
+            return NoContent();
         }
     }
 }

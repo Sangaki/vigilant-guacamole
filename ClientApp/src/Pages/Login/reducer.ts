@@ -1,7 +1,7 @@
 import { createAction, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { setToken } from 'src/api';
 import { loginRequest, LoginResponseI } from 'src/api/auth';
 import { LoginI } from 'src/shared/types/Login';
-import { setToken } from '../../api';
 
 interface LoginReducerStateI {
   token: string,
@@ -9,7 +9,7 @@ interface LoginReducerStateI {
 }
 
 const loginInitialState: LoginReducerStateI = {
-  token: localStorage.getItem('userToken') || '',
+  token: localStorage.getItem('accessToken') || '',
   error: '',
 };
 
@@ -39,9 +39,9 @@ const loginSlice = createSlice({
   },
   extraReducers: builder => {
     builder.addCase(loginUser.fulfilled, (state, action: PayloadAction<LoginResponseI>) => {
-      setToken(action.payload.token);
+      setToken(action.payload);
       // eslint-disable-next-line no-param-reassign
-      state.token = action.payload.token;
+      state.token = action.payload.accessToken;
     });
     builder.addCase(loginUser.rejected, (state) => {
       // eslint-disable-next-line no-param-reassign

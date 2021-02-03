@@ -1,13 +1,13 @@
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import { useSelector } from 'react-redux';
+import { TokenDtoI } from 'src/shared/types/Login';
+import { RootStateI } from 'src/store';
 import { Tasks } from './Tasks';
 import { Login } from './Login';
-import { RootStateI } from '../store';
 import { Register } from './Register';
-import { LoginResponseI } from '../api/auth';
 
-const loginSelector = (store: RootStateI): LoginResponseI => store.login;
+const loginSelector = (store: RootStateI): TokenDtoI => store.login;
 
 export function AppRouter() {
   const loginState = useSelector(loginSelector);

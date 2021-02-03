@@ -8,10 +8,11 @@ using just_do.Contexts;
 using just_do.Models.BaseModels;
 using Microsoft.AspNetCore.Authorization;
 using just_do.Enums;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace just_do.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class TasksController : ControllerBase

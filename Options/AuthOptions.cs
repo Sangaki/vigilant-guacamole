@@ -1,15 +1,14 @@
 ﻿using System.Text;
+using just_do.Services;
 using Microsoft.IdentityModel.Tokens;
 
 namespace just_do.Options
 {
     public class AuthOptions
     {
-        const string KEY = "mysupersecret_secretkey!123";
-        public const int LIFETIME = 2400;
         public static SymmetricSecurityKey GetSymmetricSecurityKey()
         {
-            return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(KEY));
+            return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(ConfigurationManager.AppSetting["jwt:secretKey"]));
         }
     }
 }

@@ -1,7 +1,9 @@
-import React, { ChangeEvent, useCallback, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { TaskI } from 'src/shared/types/Tasks';
-import { Priority } from 'src/shared/enums/priority';
+import { DropdownPriorities } from 'src/shared/enums/priority';
 import { getFormattedTimeFromString } from 'src/shared/helpers/date';
+import { TaskErrors } from 'src/shared/enums/errors';
+import { CustomDropdown } from '../CustomDropdown';
 import './index.scss';
 
 interface Props {
@@ -17,20 +19,24 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
   const [newHeader, setNewHeader] = useState(task.name);
   const [editDescription, setEditDescription] = useState(false);
   const [newDescription, setNewDescription] = useState(task.description);
+  const [newPriority, setNewPriority] = useState(task.priority.toString());
 
   const taskTime = getFormattedTimeFromString(task.dateTime);
 
   const updateTask = useCallback(() => {
+    if (newHeader.replace(' ', '').length === 0) {
+      throw new Error(TaskErrors.emptyHeader);
+    }
     const updatedTask: TaskI = {
       ...task,
       name: newHeader,
       description: newDescription,
-
+      priority: parseInt(newPriority, 10),
     };
     setEditHeader(false);
     setEditDescription(false);
     onUpdate(updatedTask);
-  }, [newHeader, newDescription, onUpdate, task]);
+  }, [newHeader, newDescription, onUpdate, task, newPriority]);
 
   const startEditHeader = useCallback(() => {
     setEditHeader(true);
@@ -49,6 +55,10 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
   const confirmTaskComplete = useCallback(() => {
     onCompleteTask(task.taskId);
   }, [onCompleteTask, task.taskId]);
+
+  useEffect(() => {
+    updateTask();
+  }, [newPriority]);
 
   return (
     <div className="task-block">
@@ -83,7 +93,7 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
             onClick={startEditDescription}
             role="button"
             onKeyDown={() => {}}
-          >{newDescription || task.description || 'Enter description...'}
+          >{task.description.replace(' ', '').length > 0 ? task.description : 'Enter description...'}
           </span>
           <input
             id={`description_${task.taskId}`}
@@ -95,7 +105,11 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
           />
         </div>
         <div className={`task-priority priority-${task.priority}`}>
-          <span>{Priority[task.priority]}</span>
+          <CustomDropdown
+            options={DropdownPriorities}
+            onSelect={(val: string) => setNewPriority(val)}
+            selectedOption={newPriority}
+          />
         </div>
         <div className="task-time">
           <span>{taskTime}</span>

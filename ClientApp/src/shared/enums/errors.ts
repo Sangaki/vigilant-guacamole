@@ -14,3 +14,7 @@ export enum PasswordConfirmErrors {
 export enum EmailErrors {
   'notExist' = 'This address does not exist',
 }
+
+export enum TaskErrors {
+  'emptyHeader' = "Task header shouldn't be empty",
+}

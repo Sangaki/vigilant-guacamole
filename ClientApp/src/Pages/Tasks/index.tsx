@@ -15,16 +15,15 @@ import {
 import DatePicker from 'react-date-picker';
 import TimePicker from 'react-time-picker';
 import { RootStateI } from 'src/store';
-import { Priority } from 'src/shared/enums/priority';
+import { DropdownPriorities } from 'src/shared/enums/priority';
 import { NewTaskI, TaskI } from 'src/shared/types/Tasks';
 import { TasksContainer } from 'src/Components/TasksContainer';
+import { CustomDropdown } from 'src/Components/CustomDropdown';
 import { logoutUser } from '../Login/reducer';
 import { completeTask, createNewTask, fetchTasksWithFilter, updateTask } from './reducer';
 import './index.scss';
 
 const tasksSelector = (store: RootStateI): TaskI[] => store.tasks.tasks;
-
-const prioritiesAsArray = Object.values(Priority).slice(0, Object.keys(Priority).length / 2);
 
 export const Tasks: React.FunctionComponent = () => {
   const dispatch = useDispatch();
@@ -42,18 +41,22 @@ export const Tasks: React.FunctionComponent = () => {
   const [newTaskDate, setNewTaskDate] = useState<Date>(new Date());
   const [newTaskTime, setNewTaskTime] = useState('10:00');
   const [newTaskCompiledDate, setNewTaskCompiledDate] = useState<Date>(new Date());
-  const [newTaskPriority, setNewTaskPriority] = useState(-1);
-  const [newTaskPriorityOpen, setNewTaskPriorityOpen] = useState(false);
+  const [newTaskPriority, setNewTaskPriority] = useState<number|string>(-1);
     
   const [newTaskHeaderError, setNewTaskHeaderError] = useState(false);
 
   const [completeModal, setCompleteModal] = useState(false);
   const [completingTaskId, setCompletingTaskId] = useState('');
-  const toggleModal = () => setCompleteModal(!completeModal);
 
-  const toggleSidebar = () => setCollapseSidebar(!collapseSidebar);
-  const toggleMenu = () => setMenuOpen(!menuOpen);
-  const toggleNewTaskPriority = () => setNewTaskPriorityOpen(!newTaskPriorityOpen);
+  const toggleModal = useCallback(() => {
+    setCompleteModal(!completeModal);
+  }, [setCompleteModal, completeModal]);
+  const toggleSidebar = useCallback(() => {
+    setCollapseSidebar(!collapseSidebar);
+  }, [setCollapseSidebar, collapseSidebar]);
+  const toggleMenu = useCallback(() => {
+    setMenuOpen(!menuOpen);
+  }, [setMenuOpen, menuOpen]);
     
   const signOut = useCallback(() => {
     dispatch(logoutUser());
@@ -78,7 +81,7 @@ export const Tasks: React.FunctionComponent = () => {
       name: newTaskHeader,
       description: newTaskDescription || '',
       dateTime: newTaskCompiledDate,
-      priority: newTaskPriority === -1 ? 0 : newTaskPriority,
+      priority: newTaskPriority === -1 ? 0 : parseInt(newTaskPriority.toString(), 10),
     };
 
     dispatch(createNewTask(newTask));
@@ -98,18 +101,18 @@ export const Tasks: React.FunctionComponent = () => {
   const onTaskComplete = useCallback((id: string) => {
     setCompletingTaskId(id);
     toggleModal();
-  }, [dispatch, toggleModal]);
+  }, [toggleModal]);
 
   const onTaskCompleteConfirm = useCallback(() => {
     toggleModal();
     dispatch(completeTask(completingTaskId));
     setCompletingTaskId('');
-  }, [dispatch, toggleModal]);
+  }, [dispatch, toggleModal, completingTaskId]);
 
   const onTaskCompleteCancel = useCallback(() => {
     toggleModal();
     setCompletingTaskId('');
-  }, [dispatch, toggleModal]);
+  }, [toggleModal]);
 
   useEffect(() => {
     dispatch(fetchTasksWithFilter(selectedFilter));
@@ -156,20 +159,20 @@ export const Tasks: React.FunctionComponent = () => {
               >All
               </span><br />
               {
-                prioritiesAsArray.map(p => {
+                DropdownPriorities.map(p => {
                   return (
                     <>
                       <span
                         className={`priority-point${
-                          selectedFilter === prioritiesAsArray.indexOf(p).toString() 
+                          selectedFilter === p.value.toString()
                             ? ' active' 
                             : ''
                         }`}
-                        onClick={() => setSelectedFilter(prioritiesAsArray.indexOf(p).toString())}
+                        onClick={() => setSelectedFilter(p.value.toString())}
                         onKeyDown={() => {}}
                         role="button"
                       >
-                        {p.toString().split(' ')[0]}
+                        {p.label.split(' ')[0]}
                       </span>
                       <br />
                     </>
@@ -220,35 +223,7 @@ export const Tasks: React.FunctionComponent = () => {
                 onChange={onTimeChange}
                 value={newTaskTime}
               />
-              <Dropdown isOpen={newTaskPriorityOpen} toggle={() => {}}>
-                <DropdownToggle onClick={toggleNewTaskPriority}>{newTaskPriority === -1 ? 'Priority' : Priority[newTaskPriority]}</DropdownToggle>
-                <DropdownMenu>
-                  <DropdownItem onClick={() => {
-                    setNewTaskPriority(0);
-                    setNewTaskPriorityOpen(false);
-                  }}
-                  >Neutral
-                  </DropdownItem>
-                  <DropdownItem onClick={() => {
-                    setNewTaskPriority(1);
-                    setNewTaskPriorityOpen(false);
-                  }}
-                  >Normal
-                  </DropdownItem>
-                  <DropdownItem onClick={() => {
-                    setNewTaskPriority(2);
-                    setNewTaskPriorityOpen(false);
-                  }}
-                  >Important
-                  </DropdownItem>
-                  <DropdownItem onClick={() => {
-                    setNewTaskPriority(3);
-                    setNewTaskPriorityOpen(false);
-                  }}
-                  >Urgently
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
+              <CustomDropdown options={DropdownPriorities} onSelect={(val: string) => setNewTaskPriority(val)} />
               <Button 
                 className="task-create__submit"
                 onClick={initSendNewTask}

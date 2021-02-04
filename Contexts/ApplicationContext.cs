@@ -1,5 +1,5 @@
-﻿using just_do.Models.BaseModels;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using just_do.Models.ActionModels.Authentication;
+using just_do.Models.BaseModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace just_do.Contexts
@@ -8,6 +8,7 @@ namespace just_do.Contexts
     {
         public DbSet<User> Users { get; set; }
         public DbSet<ToDoTask> Tasks { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             

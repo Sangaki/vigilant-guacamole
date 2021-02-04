@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 using IdentityModel;
-using just_do.Models;
+using just_do.Models.ActionModels.Authentication;
 using just_do.Models.BaseModels;
 using just_do.Options;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace just_do.Services
@@ -18,22 +16,19 @@ namespace just_do.Services
     }
     public class JwtHandler : IJwtHandler
     {
-        private readonly JwtOptions _options;
         private readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-        private readonly SecurityKey _securityKey;
-        private readonly SigningCredentials _signingCredentials;
-        private readonly JwtHeader _jwtHeader;
 
-        public JwtHandler(IOptions<JwtOptions> options)
+        public JwtHandler()
         {
-            _options = options.Value;
-            _securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey));
-            _signingCredentials = new SigningCredentials(_securityKey, SecurityAlgorithms.HmacSha256);
-            _jwtHeader = new JwtHeader(_signingCredentials);
         }
 
         public JsonWebToken Create(User person)
         {
+            if (person == null)
+            {
+                throw new Exception("Not implemented yet!");
+            }
+
             var nowUtc = DateTime.UtcNow;
             var expires = nowUtc.Add(TimeSpan.FromMinutes(double.Parse(ConfigurationManager.AppSetting["jwt:expiryMinutes"])));
             var centuryBegin = new DateTime(1970, 1, 1).ToUniversalTime();
@@ -54,20 +49,15 @@ namespace just_do.Services
         }
         private ClaimsIdentity GetIdentity(User person)
         {
-            if (person != null)
+            var claims = new List<Claim>
             {
-                var claims = new List<Claim>
-                {
-                    new Claim(JwtClaimTypes.Subject, person.Id),
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, person.Email),
-                };
-                ClaimsIdentity claimsIdentity =
-                    new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
-                        ClaimsIdentity.DefaultRoleClaimType);
-                return claimsIdentity;
-            }
-
-            return null;
+                new Claim(JwtClaimTypes.Subject, person.Id),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, person.Email),
+            };
+            ClaimsIdentity claimsIdentity =
+                new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
+                    ClaimsIdentity.DefaultRoleClaimType);
+            return claimsIdentity;
         }
     }
 }

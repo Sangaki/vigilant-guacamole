@@ -1,33 +1,35 @@
+using System;
 using just_do.Contexts;
+using just_do.Middlewares;
+using just_do.Models.ActionModels.Authentication;
 using just_do.Models.BaseModels;
 using just_do.Options;
+using just_do.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using just_do.Models;
-using just_do.Middlewares;
-using Microsoft.AspNetCore.Http;
-using just_do.Services;
-using System;
+using Microsoft.OpenApi.Models;
 
 namespace just_do
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
+        private string dbString;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            dbString = Configuration["postgres:connectionString"];
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -44,18 +46,16 @@ namespace just_do
                     Scheme = "bearer"
                 });
             });
-
-            const string connectionString = "Host=ec2-52-208-138-246.eu-west-1.compute.amazonaws.com;Port=5432;Database=d158hirmftf7mq;Username=lodfkybiutsvox;Password=4575aa96c3765a4e74420ce60afe4761a011002c6bfce33a20344340916e4cbc;SslMode=Require;Trust Server Certificate=true";
-            
+                        
             services.AddDbContext<ApplicationContext>();
             
             services.AddMvcCore();
             services.AddIdentityServer()
                 .AddDeveloperSigningCredential()
                 .AddConfigurationStore(option =>
-                    option.ConfigureDbContext = builder => builder.UseNpgsql(connectionString))
+                    option.ConfigureDbContext = builder => builder.UseNpgsql(dbString))
                 .AddOperationalStore(option =>
-                    option.ConfigureDbContext = builder => builder.UseNpgsql(connectionString));
+                    option.ConfigureDbContext = builder => builder.UseNpgsql(dbString));
 
             services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>();
 
@@ -63,7 +63,7 @@ namespace just_do
             services.AddScoped<SignInManager<User>>();
 
             //jwt scope
-            services.AddSingleton<IAccountService, AccountService>();
+            services.AddTransient<IAccountService, AccountService>();
             services.AddSingleton<IJwtHandler, JwtHandler>();
             services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddTransient<TokenManagerMiddleware>();

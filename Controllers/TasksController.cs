@@ -2,40 +2,35 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using just_do.Contexts;
+using just_do.Enums;
+using just_do.Models.BaseModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using just_do.Contexts;
-using just_do.Models.BaseModels;
-using Microsoft.AspNetCore.Authorization;
-using just_do.Enums;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace just_do.Controllers
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TasksController : ControllerBase
+    public class TasksController : BaseApiController
     {
-        private readonly ApplicationContext _context;
-
-        public TasksController(ApplicationContext context)
+        public TasksController(IHttpContextAccessor contextAccessor, ApplicationContext context): base (contextAccessor, context)
         {
-            _context = context;
         }
 
         // GET: api/Tasks
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ToDoTask>>> GetTasks(TaskPriority? taskPriority)
         {
-            var userId = HttpContext.User.Claims.First().Value;
             if (taskPriority != null)
             {
-                return await _context.Tasks.Where(t => t.UserId == userId && t.priority == taskPriority).ToListAsync();
+                return await _context.Tasks.Where(t => t.UserId == _contextUserId && t.priority == taskPriority).ToListAsync();
             } 
             else
             {
-                return await _context.Tasks.Where(t => t.UserId == userId).ToListAsync();
+                return await _context.Tasks.Where(t => t.UserId == _contextUserId).ToListAsync();
             }
         }
 
@@ -43,10 +38,9 @@ namespace just_do.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ToDoTask>> GetToDoTask(string id)
         {
-            var userId = HttpContext.User.Claims.First().Value;
             var toDoTask = await _context.Tasks.FindAsync(id);
 
-            if (toDoTask == null || toDoTask.UserId != userId)
+            if (toDoTask == null || toDoTask.UserId != _contextUserId) 
             {
                 return NotFound();
             }
@@ -54,45 +48,32 @@ namespace just_do.Controllers
             return toDoTask;
         }
 
-        // PUT: api/Tasks/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutToDoTask(string id, ToDoTask toDoTask)
+        // PUT: api/Tasks
+        [HttpPut]
+        public async Task<IActionResult> PutToDoTask(ToDoTask toDoTask)
         {
-            var userId = HttpContext.User.Claims.First().Value;
-            var toDoTaskInDb = await _context.Tasks.AsNoTracking().FirstOrDefaultAsync(x => x.TaskId == id);
+            var toDoTaskInDb = await _context.Tasks
+                .AsNoTracking()
+                .Where(t => t.UserId == _contextUserId)
+                .FirstOrDefaultAsync(x => x.TaskId == toDoTask.TaskId);
             
-            if (id != toDoTask.TaskId || toDoTaskInDb == null || toDoTaskInDb.UserId != userId)
+            if (toDoTaskInDb == null)
             {
-                return BadRequest();
+                return NotFound();
             }
             
             _context.Entry(toDoTask).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ToDoTaskExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetToDoTask", new { id = toDoTask.TaskId }, toDoTask);
+            await _context.SaveChangesAsync();
+            
+            return Ok(toDoTask);
         }
 
         // POST: api/Tasks
         [HttpPost]
         public async Task<ActionResult<ToDoTask>> PostToDoTask(ToDoTask toDoTask)
         {
-            var userId = HttpContext.User.Claims.First().Value;
-            toDoTask.UserId = userId;
+            toDoTask.UserId = _contextUserId;
             toDoTask.TaskId = Guid.NewGuid().ToString();
             _context.Tasks.Add(toDoTask);
             try
@@ -111,7 +92,7 @@ namespace just_do.Controllers
                 }
             }
 
-            return CreatedAtAction("GetToDoTask", new { id = toDoTask.TaskId }, toDoTask);
+            return Ok(toDoTask);
         }
 
         // DELETE: api/Tasks/5
@@ -119,9 +100,8 @@ namespace just_do.Controllers
         public async Task<ActionResult<ToDoTask>> DeleteToDoTask(string id)
         {
             var toDoTask = await _context.Tasks.FindAsync(id);
-            var userId = HttpContext.User.Claims.First().Value;
             
-            if (toDoTask == null || toDoTask.UserId != userId)
+            if (toDoTask == null || toDoTask.UserId != _contextUserId)
             {
                 return NotFound();
             }

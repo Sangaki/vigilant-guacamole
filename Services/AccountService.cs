@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using just_do.Models;
+using System.Threading.Tasks;
+using just_do.Contexts;
+using just_do.Models.ActionModels.Authentication;
 using just_do.Models.BaseModels;
 using Microsoft.AspNetCore.Identity;
 
@@ -15,19 +16,24 @@ namespace just_do.Services
     }
     public class AccountService : IAccountService
     {
-        private readonly ISet<User> _users = new HashSet<User>();
-        private readonly ISet<RefreshToken> _refreshTokens = new HashSet<RefreshToken>();
+        private readonly ApplicationContext _context;
+        private readonly UserManager<User> _userManager;
         private readonly IJwtHandler _jwtHandler;
         private readonly IPasswordHasher<User> _passwordHasher;
 
-        public AccountService(IJwtHandler jwtHandler,
-            IPasswordHasher<User> passwordHasher)
+        public AccountService(
+            IJwtHandler jwtHandler,
+            IPasswordHasher<User> passwordHasher,
+            ApplicationContext context,
+            UserManager<User> userManager)
         {
+            _context = context;
+            _userManager = userManager;
             _jwtHandler = jwtHandler;
             _passwordHasher = passwordHasher;
         }
 
-        public void SignUp(string username, string password)
+        public async void SignUp(string username, string password)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -41,7 +47,7 @@ namespace just_do.Services
             {
                 throw new Exception($"Username '{username}' is already in use.");
             }
-            _users.Add(new User { Email = username, PasswordHash = password });
+            await _userManager.CreateAsync(new User { Email = username, PasswordHash = password });
         }
 
         public JsonWebToken SignIn(User user)
@@ -52,8 +58,8 @@ namespace just_do.Services
                 .Replace("=", string.Empty)
                 .Replace("/", string.Empty);
             jwt.RefreshToken = refreshToken;
-            _refreshTokens.Add(new RefreshToken { Username = user.Email, Token = refreshToken });
 
+            _context.RefreshTokens.Add(new RefreshToken { Username = user.Email, Token = refreshToken });
             return jwt;
         }
 
@@ -74,10 +80,12 @@ namespace just_do.Services
             return jwt;
         }
 
-        private User GetUser(string username)
-            => _users.SingleOrDefault(x => string.Equals(x.Email, username, StringComparison.InvariantCultureIgnoreCase));
+        private async Task<User> GetUser(string username)
+        {
+            return await _userManager.FindByEmailAsync(username);
+        }
 
         private RefreshToken GetRefreshToken(string token)
-            => _refreshTokens.SingleOrDefault(x => x.Token == token);
+            => _context.RefreshTokens.SingleOrDefault(x => x.Token == token);
     }
 }

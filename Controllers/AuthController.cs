@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using just_do.Contexts;
-using just_do.Middlewares;
 using just_do.Models;
 using just_do.Models.ActionModels;
+using just_do.Models.ActionModels.Authentication;
 using just_do.Models.BaseModels;
 using just_do.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -16,20 +13,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace just_do.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseApiController
     {
-        private readonly ApplicationContext _context;
         private readonly IAccountService _accountService;
         private readonly ITokenManager _tokenManager;
 
         public AuthController(
+            IHttpContextAccessor contextAccessor,
             ApplicationContext context,
             IAccountService accountService,
-            ITokenManager tokenManager)
+            ITokenManager tokenManager) : base(contextAccessor, context)
         {
-            _context = context;
             _accountService = accountService;
             _tokenManager = tokenManager;
         }
@@ -69,7 +63,7 @@ namespace just_do.Controllers
             return BadRequest();
         }
 
-        [HttpPost("tokens/refresh")]
+        [HttpPost("refresh-token")]
         [AllowAnonymous]
         public async Task<ActionResult<JsonWebToken>> RefreshAccessToken([FromBody] TokenDto tokenDto)
         {
@@ -77,7 +71,7 @@ namespace just_do.Controllers
             return user == null ? BadRequest() : Ok(_accountService.RefreshAccessToken(tokenDto.token, user));
         }
 
-        [HttpPost("tokens/cancel")]
+        [HttpPost("cancel-token")]
         public async Task<IActionResult> CancelAccessToken()
         {
             await _tokenManager.DeactivateCurrentAsync();

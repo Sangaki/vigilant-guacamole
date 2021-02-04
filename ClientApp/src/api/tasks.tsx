@@ -18,7 +18,7 @@ export function postTask(task: NewTaskI): Promise<AxiosResponse<TaskI>> {
 }
 
 export function putTask(task: TaskI): Promise<AxiosResponse<TaskI>> {
-  return axios.put(`/tasks/${task.taskId}`, task);
+  return axios.put('/tasks', task);
 }
 
 export function deleteTask(id: string): Promise<AxiosResponse<void>> {

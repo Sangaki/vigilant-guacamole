@@ -7,7 +7,6 @@ export interface RegisterI extends LoginI {}
 
 export interface TokenDtoI {
   token: string,
-  userId: string,
 }
 
 export interface JsonWebTokenI {

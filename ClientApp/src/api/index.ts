@@ -27,14 +27,12 @@ config.interceptors.response.use((response) => {
     isRefreshing = true;
 
     const refreshToken = localStorage.getItem('refreshToken');
-    const userId = localStorage.getItem('userId');
     const refreshTokenM: TokenDtoI = {
       token: refreshToken!!,
-      userId: userId!!,
     };
 
     return new Promise((resolve, reject) => {
-      axios.post('/api/auth/tokens/refresh', refreshTokenM, originalRequest)
+      axios.post('/auth/refresh-token', refreshTokenM, originalRequest)
         .then((resp) => {
           setToken(resp.data);
           originalRequest.headers.Authorization = `Bearer ${resp.data.accessToken}`;
@@ -57,6 +55,10 @@ if (userToken) {
 }
 
 export default config;
+
+export function resetAuthorization() {
+  config.defaults.headers.common.Authorization = '';
+}
 
 export function setToken(jwtSet: JsonWebTokenI) {
   localStorage.setItem('accessToken', jwtSet.accessToken);

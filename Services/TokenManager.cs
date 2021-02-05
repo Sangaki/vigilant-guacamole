@@ -43,7 +43,6 @@ namespace just_do.Services
 
         public async Task DeactivateAsync(string token)
         {
-            Console.WriteLine(TimeSpan.FromMinutes(_jwtOptions.Value.ExpiryMinutes));
             await _cache.SetStringAsync(GetKey(token),
                 " ", new DistributedCacheEntryOptions
                 {

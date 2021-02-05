@@ -10,7 +10,7 @@ namespace just_do.Services
 {
     public interface IAccountService
     {
-        void SignUp(string username, string password);
+        Task SignUp(string username, string password);
         JsonWebToken SignIn(User user);
         JsonWebToken RefreshAccessToken(string token, User user);
     }
@@ -33,21 +33,14 @@ namespace just_do.Services
             _passwordHasher = passwordHasher;
         }
 
-        public async void SignUp(string username, string password)
+        public async Task SignUp(string username, string password)
         {
-            if (string.IsNullOrWhiteSpace(username))
+            var registerResult = await _userManager.CreateAsync(new User { Email = username, UserName = username }, password);
+
+            if (!registerResult.Succeeded)
             {
-                throw new Exception($"Username can not be empty.");
-            }
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                throw new Exception($"Password can not be empty.");
-            }
-            if (GetUser(username) != null)
-            {
-                throw new Exception($"Username '{username}' is already in use.");
-            }
-            await _userManager.CreateAsync(new User { Email = username, PasswordHash = password });
+                throw new Exception("Cannot create user");
+            };
         }
 
         public JsonWebToken SignIn(User user)
@@ -59,7 +52,15 @@ namespace just_do.Services
                 .Replace("/", string.Empty);
             jwt.RefreshToken = refreshToken;
 
-            _context.RefreshTokens.Add(new RefreshToken { Username = user.Email, Token = refreshToken });
+            var oldRefreshToken = _context.RefreshTokens.Where(r => r.Username == user.Email)
+                .FirstOrDefault(t => t.Revoked == false);
+            if (oldRefreshToken != null)
+            {
+                oldRefreshToken.Revoked = true;
+            }
+            _context.RefreshTokens.Add(new RefreshToken { TokenId = Guid.NewGuid().ToString(), Username = user.Email, Token = refreshToken });
+            _context.SaveChanges();
+
             return jwt;
         }
 

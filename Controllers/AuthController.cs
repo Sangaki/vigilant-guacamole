@@ -30,9 +30,9 @@ namespace just_do.Controllers
 
         [HttpPost("sign-up")]
         [AllowAnonymous]
-        public IActionResult SignUp([FromBody] RegisterModel request)
+        public async Task<IActionResult> SignUp([FromBody] RegisterModel request)
         {
-            _accountService.SignUp(request.Email, request.Password);
+            await _accountService.SignUp(request.Email, request.Password);
 
             return NoContent();
         }
@@ -67,8 +67,12 @@ namespace just_do.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<JsonWebToken>> RefreshAccessToken([FromBody] TokenDto tokenDto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == tokenDto.userId);
-            return user == null ? BadRequest() : Ok(_accountService.RefreshAccessToken(tokenDto.token, user));
+            if (_contextUserId != null)
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == _contextUserId);
+                return Ok(_accountService.RefreshAccessToken(tokenDto.token, user));
+            }
+            return NotFound();
         }
 
         [HttpPost("cancel-token")]

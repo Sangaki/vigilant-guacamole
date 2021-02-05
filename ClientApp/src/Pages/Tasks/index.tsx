@@ -58,8 +58,8 @@ export const Tasks: React.FunctionComponent = () => {
     setMenuOpen(!menuOpen);
   }, [setMenuOpen, menuOpen]);
     
-  const signOut = useCallback(() => {
-    dispatch(logoutUser());
+  const signOut = useCallback(async () => {
+    await dispatch(logoutUser());
     history.push('/login');
   }, [dispatch, history]);
     

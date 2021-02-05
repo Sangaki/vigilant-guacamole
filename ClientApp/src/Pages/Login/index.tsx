@@ -17,8 +17,9 @@ export const Login: React.FunctionComponent<{}> = () => {
   const [password, setPassword] = useState('');
   const [credentialsError, setCredentialsError] = useState(loginErrorState);
     
-  const initLogin = useCallback(() => {
-    dispatch(loginUser({ email: login, password }));
+  const initLogin = useCallback(async () => {
+    await dispatch(loginUser({ email: login, password }));
+    history.push('/');
   }, [login, password, dispatch]);
     
   return (

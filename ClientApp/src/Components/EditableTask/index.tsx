@@ -35,7 +35,8 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
     };
     setEditHeader(false);
     setEditDescription(false);
-    onUpdate(updatedTask);
+    // TODO: Fix unexpected cycle of Rerenders
+    // onUpdate(updatedTask);
   }, [newHeader, newDescription, onUpdate, task, newPriority]);
 
   const startEditHeader = useCallback(() => {

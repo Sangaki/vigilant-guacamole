@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { setToken } from 'src/api';
+import { resetAuthorization, setToken } from 'src/api';
 import { loginRequest, LoginResponseI, signoutRequest } from 'src/api/auth';
 import { LoginI } from 'src/shared/types/Login';
 
@@ -43,6 +43,14 @@ const loginSlice = createSlice({
       state.error = 'Bad request';
     });
     builder.addCase(logoutUser.fulfilled, (state) => {
+      // eslint-disable-next-line no-param-reassign
+      state = loginInitialState;
+      localStorage.removeItem('userId');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('expires');
+    });
+    builder.addCase(logoutUser.rejected, (state) => {
       // eslint-disable-next-line no-param-reassign
       state = loginInitialState;
       localStorage.removeItem('userId');

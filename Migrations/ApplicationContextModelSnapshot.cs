@@ -21,7 +21,7 @@ namespace just_do.Migrations
 
             modelBuilder.Entity("just_do.Models.ActionModels.Authentication.RefreshToken", b =>
                 {
-                    b.Property<string>("Username")
+                    b.Property<string>("TokenId")
                         .HasColumnType("text");
 
                     b.Property<bool>("Revoked")
@@ -30,7 +30,10 @@ namespace just_do.Migrations
                     b.Property<string>("Token")
                         .HasColumnType("text");
 
-                    b.HasKey("Username");
+                    b.Property<string>("Username")
+                        .HasColumnType("text");
+
+                    b.HasKey("TokenId");
 
                     b.ToTable("RefreshTokens");
                 });

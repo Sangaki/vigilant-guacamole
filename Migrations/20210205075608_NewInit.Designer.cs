@@ -10,16 +10,35 @@ using just_do.Contexts;
 namespace just_do.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20201218102104_RemoveUserField")]
-    partial class RemoveUserField
+    [Migration("20210205075608_NewInit")]
+    partial class NewInit
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
-                .HasAnnotation("ProductVersion", "3.1.10")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .UseIdentityByDefaultColumns()
+                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasAnnotation("ProductVersion", "5.0.2");
+
+            modelBuilder.Entity("just_do.Models.ActionModels.Authentication.RefreshToken", b =>
+                {
+                    b.Property<string>("TokenId")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("Revoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("text");
+
+                    b.HasKey("TokenId");
+
+                    b.ToTable("RefreshTokens");
+                });
 
             modelBuilder.Entity("just_do.Models.BaseModels.ToDoTask", b =>
                 {
@@ -105,6 +124,11 @@ namespace just_do.Migrations
                     b.HasOne("just_do.Models.BaseModels.User", null)
                         .WithMany("Tasks")
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("just_do.Models.BaseModels.User", b =>
+                {
+                    b.Navigation("Tasks");
                 });
 #pragma warning restore 612, 618
         }

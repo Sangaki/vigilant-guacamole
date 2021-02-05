@@ -24,11 +24,11 @@ namespace just_do
     {
         public IConfiguration Configuration { get; }
 
-        private string dbString;
+        private readonly string _dbString;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            dbString = Configuration["postgres:connectionString"];
+            _dbString = Configuration["postgres:connectionString"];
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -53,9 +53,9 @@ namespace just_do
             services.AddIdentityServer()
                 .AddDeveloperSigningCredential()
                 .AddConfigurationStore(option =>
-                    option.ConfigureDbContext = builder => builder.UseNpgsql(dbString))
+                    option.ConfigureDbContext = builder => builder.UseNpgsql(_dbString))
                 .AddOperationalStore(option =>
-                    option.ConfigureDbContext = builder => builder.UseNpgsql(dbString));
+                    option.ConfigureDbContext = builder => builder.UseNpgsql(_dbString));
 
             services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>();
 
@@ -110,11 +110,11 @@ namespace just_do
             }
             else
             {
-                app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            
+            app.UseExceptionHandler("/");
+
             app.UseSwagger();
 
             app.UseSwaggerUI(c =>

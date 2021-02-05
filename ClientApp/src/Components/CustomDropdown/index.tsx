@@ -38,7 +38,9 @@ export const CustomDropdown: React.FC<Props> = (props) => {
           return (
             <DropdownItem
               key={o.value}
-              onClick={() => onOptionChange(o.value)}
+              onClick={() => {
+                onOptionChange(o.value);
+              }}
             >
               {o.label}
             </DropdownItem>

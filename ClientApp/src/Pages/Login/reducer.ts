@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { resetAuthorization, setToken } from 'src/api';
+import { setToken } from 'src/api';
 import { loginRequest, LoginResponseI, signoutRequest } from 'src/api/auth';
 import { LoginI } from 'src/shared/types/Login';
 

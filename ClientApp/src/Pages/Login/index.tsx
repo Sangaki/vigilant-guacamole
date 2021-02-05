@@ -20,7 +20,7 @@ export const Login: React.FunctionComponent<{}> = () => {
   const initLogin = useCallback(async () => {
     await dispatch(loginUser({ email: login, password }));
     history.push('/');
-  }, [login, password, dispatch]);
+  }, [login, password, dispatch, history]);
     
   return (
     <div className="row no-gutters auth-page__wrapper">

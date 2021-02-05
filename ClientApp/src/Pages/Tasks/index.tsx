@@ -48,6 +48,8 @@ export const Tasks: React.FunctionComponent = () => {
   const [completeModal, setCompleteModal] = useState(false);
   const [completingTaskId, setCompletingTaskId] = useState('');
 
+  const [updateFlag, setUpdateFlag] = useState(false);
+
   const toggleModal = useCallback(() => {
     setCompleteModal(!completeModal);
   }, [setCompleteModal, completeModal]);
@@ -96,7 +98,8 @@ export const Tasks: React.FunctionComponent = () => {
 
   const onTaskUpdate = useCallback((updatedTask: TaskI) => {
     dispatch(updateTask(updatedTask));
-  }, [dispatch]);
+    setTimeout(() => setUpdateFlag(!updateFlag), 200);
+  }, [dispatch, updateFlag, setUpdateFlag]);
 
   const onTaskComplete = useCallback((id: string) => {
     setCompletingTaskId(id);
@@ -116,7 +119,7 @@ export const Tasks: React.FunctionComponent = () => {
 
   useEffect(() => {
     dispatch(fetchTasksWithFilter(selectedFilter));
-  }, [dispatch, selectedFilter]);
+  }, [dispatch, selectedFilter, updateFlag]);
     
   useEffect(() => {
     const compiledDate = newTaskDate;
@@ -135,7 +138,7 @@ export const Tasks: React.FunctionComponent = () => {
       } 
       return 1;
     }));
-  }, [tasksState]);
+  }, [tasksState, updateFlag]);
 
   return (
     <div className="tasks-wrapper">

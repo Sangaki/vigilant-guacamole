@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useState } from 'react';
 import { TaskI } from 'src/shared/types/Tasks';
 import { DropdownPriorities } from 'src/shared/enums/priority';
 import { getFormattedTimeFromString } from 'src/shared/helpers/date';
@@ -23,20 +23,20 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
 
   const taskTime = getFormattedTimeFromString(task.dateTime);
 
-  const updateTask = useCallback(() => {
+  const updateTask = useCallback((priority: string | undefined) => {
     if (newHeader.replace(' ', '').length === 0) {
       throw new Error(TaskErrors.emptyHeader);
     }
+    const taskPriority = priority !== undefined ? parseInt(priority, 10) : parseInt(newPriority, 10);
     const updatedTask: TaskI = {
       ...task,
       name: newHeader,
       description: newDescription,
-      priority: parseInt(newPriority, 10),
+      priority: taskPriority,
     };
     setEditHeader(false);
     setEditDescription(false);
-    // TODO: Fix unexpected cycle of Rerenders
-    // onUpdate(updatedTask);
+    onUpdate(updatedTask);
   }, [newHeader, newDescription, onUpdate, task, newPriority]);
 
   const startEditHeader = useCallback(() => {
@@ -53,13 +53,18 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
     }, 200);
   }, [setEditDescription, task.taskId]);
 
+  const onEditEnd = useCallback(() => {
+    updateTask(undefined);
+  }, [updateTask]);
+
+  const onPriorityChange = useCallback((val) => {
+    updateTask(val);
+    setNewPriority(val);
+  }, [setNewPriority, updateTask]);
+
   const confirmTaskComplete = useCallback(() => {
     onCompleteTask(task.taskId);
   }, [onCompleteTask, task.taskId]);
-
-  useEffect(() => {
-    updateTask();
-  }, [newPriority, updateTask]);
 
   return (
     <div className="task-block">
@@ -85,7 +90,7 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
             type="text"
             defaultValue={newHeader}
             onChange={(event: ChangeEvent<HTMLInputElement>) => setNewHeader(event.target.value)}
-            onBlur={updateTask}
+            onBlur={onEditEnd}
           />
         </div>
         <div className={`task-description ${editDescription ? 'edit' : ''}`}>
@@ -102,13 +107,13 @@ export const EditableTask: React.FunctionComponent<Props> = (props) => {
             type="text"
             defaultValue={newDescription}
             onChange={(event: ChangeEvent<HTMLInputElement>) => setNewDescription(event.target.value)}
-            onBlur={updateTask}
+            onBlur={onEditEnd}
           />
         </div>
         <div className={`task-priority priority-${task.priority}`}>
           <CustomDropdown
             options={DropdownPriorities}
-            onSelect={(val: string) => setNewPriority(val)}
+            onSelect={onPriorityChange}
             selectedOption={newPriority}
           />
         </div>

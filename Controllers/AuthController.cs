@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using just_do.Contexts;
 using just_do.Models;
 using just_do.Models.ActionModels;
@@ -67,12 +68,8 @@ namespace just_do.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<JsonWebToken>> RefreshAccessToken([FromBody] TokenDto tokenDto)
         {
-            if (_contextUserId != null)
-            {
-                var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == _contextUserId);
-                return Ok(_accountService.RefreshAccessToken(tokenDto.token, user));
-            }
-            return NotFound();
+            var user = await _context.Users.FirstOrDefaultAsync(a => a.Id == _contextUserId);
+            return Ok(_accountService.RefreshAccessToken(tokenDto.token, user));
         }
 
         [HttpPost("cancel-token")]

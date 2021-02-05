@@ -75,6 +75,13 @@ namespace just_do.Services
             {
                 throw new Exception("Refresh token was revoked");
             }
+
+            user ??= _context.Users.FirstOrDefault(u => u.Email == refreshToken.Username);
+            if (user == null)
+            {
+                throw new Exception("User not found.");
+            }
+
             var jwt = _jwtHandler.Create(user);
             jwt.RefreshToken = refreshToken.Token;
 

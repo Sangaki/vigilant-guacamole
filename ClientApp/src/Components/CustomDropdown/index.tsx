@@ -13,7 +13,7 @@ export const CustomDropdown: React.FC<Props> = (props) => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedValue, setSelectedValue] =
-    useState<string | number | null>(options[0] ? options[0].value : null);
+    useState<string | number | null>(selectedOption || (options[0] ? options[0].value : null));
 
   const toggleOpen = useCallback(() => {
     setIsOpen(!isOpen);
@@ -29,7 +29,7 @@ export const CustomDropdown: React.FC<Props> = (props) => {
 
   return (
     <Dropdown isOpen={isOpen} toggle={toggleOpen}>
-      <DropdownToggle onClick={toggleOpen}>
+      <DropdownToggle onClick={toggleOpen} className={`priority-${selectedValue}`}>
         {options.find(o => o.value.toString() === selectedOption)?.label
         || options.find(o => o.value.toString() === selectedValue?.toString())?.label}
       </DropdownToggle>

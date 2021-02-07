@@ -5,12 +5,9 @@
   overflow: auto;
 
   .task-date-wrapper {
-    position: relative;
-
     .task-date {
-      position: absolute;
-      top: 20px;
-      left: 30px;
+      padding-top: 20px;
+      padding-bottom: 20px;
       letter-spacing: 0;
       color: #BBBBC7;
       font-size: 20px;
@@ -23,7 +20,7 @@
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    margin-top: 60px;
+    margin-bottom: 50px;
     flex-shrink: 0;
     position: relative;
 
@@ -78,30 +75,6 @@
           letter-spacing: 0.28px;
           color: #212020;
         }
-      }
-
-      .task-priority span:before {
-        content: "";
-        display: block;
-        position: absolute;
-        left: 0;
-        top: 6px;
-        width: 12px;
-        height: 12px;
-        border-radius: 12px;
-        background: #C9C9C9 0% 0% no-repeat padding-box;
-      }
-
-      .task-priority.priority-1 span:before {
-        background: #307e02 0% 0% no-repeat padding-box;
-      }
-
-      .task-priority.priority-2 span:before {
-        background: #F7C920 0% 0% no-repeat padding-box;
-      }
-
-      .task-priority.priority-3 span:before {
-        background: #F24A3C 0% 0% no-repeat padding-box;
       }
 
       .task-time span:before {

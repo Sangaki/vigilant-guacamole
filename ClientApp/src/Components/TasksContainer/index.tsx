@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { GroupedTasksByDateI, groupTasksByDate } from 'src/shared/helpers/tasks';
 import { TaskI } from 'src/shared/types/Tasks';
-import { EditableTask } from '../EditableTask';
 import './index.scss';
+import { TasksByDateCollapsing } from '../TasksByDateCollapsing';
 
 interface Props {
   tasks: TaskI[],
@@ -22,23 +22,18 @@ export const TasksContainer: React.FunctionComponent<Props> = (props) => {
 
   return (
     <div className="tasks-container">
-      {groupedTasks && Object.keys(groupedTasks).map(gt => {
-        return (
-          <div className="task-date-wrapper" key={gt}>
-            <div className="task-date">
-              {gt}
-            </div>
-            {
-                groupedTasks[gt].map(t => {
-                  return <EditableTask
-                    task={t}
-                    key={t.taskId}
-                    onUpdate={onTaskUpdate}
-                    onCompleteTask={onCompleteTask}
-                  />;
-                })
-            }
-          </div>);
-      })}
+      {
+        groupedTasks && Object.keys(groupedTasks).map(gt => {
+          return (
+            <TasksByDateCollapsing
+              key={gt}
+              tasks={groupedTasks ? groupedTasks[gt] : undefined}
+              date={gt}
+              onCompleteTask={onCompleteTask}
+              onTaskUpdate={onTaskUpdate}
+            />
+          );
+        })
+      }
     </div>);
 };

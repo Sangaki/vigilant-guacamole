@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:sys="clr-namespace:System;assembly=netstandard"
+             x:Class="JustToDo.ViewModels.TasksFlyoutSide"
+             Padding="0,0,0,0"
+             Title="Tasks">
+    <ContentView>
+        <FlexLayout BackgroundColor="Bisque" 
+                    HeightRequest="1000" 
+                    Direction="Column"
+                    AlignItems="Start"
+                    Padding="30"
+                    JustifyContent="SpaceBetween">
+                <Label Text="Just DO"
+                       TextColor="Black"
+                       FontAttributes="Bold"
+                       FontSize="36"
+                       HorizontalTextAlignment="Center"
+                       VerticalOptions="Start" />
+                <StackLayout 
+                       HorizontalOptions="Start"
+                       x:Name="PriorityStackLayout">
+                    <Label Text="All"
+                           TextColor="Black"
+                           FontAttributes="Bold"
+                           FontSize="20"
+                           x:Name="AllPrioritiesButton"></Label>
+                </StackLayout>
+                <StackLayout HorizontalOptions="Start">
+                    <Label Text="Settings"
+                           TextColor="Black"
+                           FontAttributes="Bold"
+                           FontSize="20"
+                           x:Name="SettingsButton"></Label>
+                       <Label Text="Sign Out"
+                              TextColor="Black"
+                              FontAttributes="Bold"
+                              FontSize="20"
+                              x:Name="SignOutButton"></Label>
+                </StackLayout>
+                <StackLayout>
+                    <Label Text="'Just do' Application by Sangaki"
+                           TextColor="Black"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           VerticalOptions="End"/>
+                    <Label Text="{Binding Source={x:Static sys:DateTime.Now}, StringFormat='{0:yyyy}'}"
+                           TextColor="Black"
+                           HorizontalOptions="Center" />
+                </StackLayout>
+        </FlexLayout>
+    </ContentView>
+</ContentPage>

@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="JustToDo.ViewModels.Settings">
+    <NavigationPage.TitleView>
+        <Label x:Name="tabLabel" HorizontalOptions="End" />
+    </NavigationPage.TitleView>
+    <ContentPage.Content>
+        <StackLayout>
+            <Label 
+                Text="Settings Page"
+                VerticalOptions="CenterAndExpand"
+                HorizontalOptions="CenterAndExpand" 
+            />
+            <Button 
+                Text="Logout" 
+                Clicked="OnLogoutClicked"
+                WidthRequest="200"
+                HeightRequest="80"
+            />
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

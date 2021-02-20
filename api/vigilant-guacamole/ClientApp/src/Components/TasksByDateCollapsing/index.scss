@@ -1,0 +1,41 @@
+.task-date-wrapper {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  .task-date > span {
+    position: relative;
+  }
+
+  .task-date > span:after {
+    content: url("/images/ic_arrow_down.svg");
+    filter: invert(40%);
+    position: absolute;
+    right: -25px;
+    transition: all .5s ease-in-out;
+    transform-origin: center center;
+  }
+
+  .task-date .tasks-body {
+    flex: 0 1 100%;
+  }
+
+  .tasks-body {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    transition: height .5s ease-in-out;
+  }
+}
+
+.task-date-wrapper.collapsed {
+  .task-date > span:after {
+    margin-top: 10px;
+    transform: rotate(-180deg);
+  }
+
+  .tasks-body {
+    max-height: 0;
+    opacity: 0;
+  }
+}

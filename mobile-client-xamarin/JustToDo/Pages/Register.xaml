@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            x:Class="JustToDo.ViewModels.Register">
+    <NavigationPage.TitleView>
+        <Label x:Name="tabLabel" HorizontalOptions="End" />
+    </NavigationPage.TitleView>
+    <ContentPage.Content>
+        <StackLayout>
+            <Label 
+                Text="Sign Up"
+                FontSize="24"
+                FontAttributes="Italic"
+                TextColor="Navy"
+                Margin="25"
+                VerticalOptions="StartAndExpand"
+                HorizontalOptions="CenterAndExpand"
+            />
+            <Entry 
+                Placeholder="Email"
+                PlaceholderColor="Gray"
+                ClearButtonVisibility="WhileEditing"
+                VerticalOptions="StartAndExpand"
+            />
+            <Entry 
+                Placeholder="Password"
+                IsPassword="True"
+                PlaceholderColor="Gray"
+                ClearButtonVisibility="WhileEditing"
+                VerticalOptions="StartAndExpand"
+            />
+            <Entry 
+                Placeholder="Confirm Password"
+                IsPassword="True"
+                PlaceholderColor="Gray"
+                ClearButtonVisibility="WhileEditing"
+                VerticalOptions="StartAndExpand"
+            />
+            <Button 
+                Text="Sign Up" 
+                Clicked="OnSignUpClicked"
+                WidthRequest="200"
+                HeightRequest="80"
+                VerticalOptions="StartAndExpand"
+            />
+            <Button 
+                Text="Already have an account? Sign In" 
+                Clicked="NavToLogin"
+                BackgroundColor="Transparent"
+                TextColor="Blue"
+                WidthRequest="200"
+                HeightRequest="80"
+                VerticalOptions="StartAndExpand"
+            />
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

@@ -1,0 +1,8 @@
+C:\Users\MichaelMentalstack\Desktop\learning\JustToDo.dll
+C:\Users\MichaelMentalstack\Desktop\learning\JustToDo.deps.json
+C:\Users\MichaelMentalstack\Desktop\learning\JustToDo.pdb
+C:\Users\MichaelMentalstack\Desktop\learning\System.Numerics.Vectors.dll
+C:\Users\MichaelMentalstack\Desktop\learning\Xamarin.Essentials.dll
+C:\Users\MichaelMentalstack\Desktop\learning\Xamarin.Forms.Core.dll
+C:\Users\MichaelMentalstack\Desktop\learning\Xamarin.Forms.Platform.dll
+C:\Users\MichaelMentalstack\Desktop\learning\Xamarin.Forms.Xaml.dll

@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="JustToDo.ViewModels.Login">
+    <NavigationPage.TitleView>
+        <Label x:Name="tabLabel" HorizontalOptions="End" />
+    </NavigationPage.TitleView>
+    <StackLayout>
+        <Label Text="JustDO"
+               FontSize="40"
+               FontAttributes="Italic"
+               TextColor="Navy"
+               Margin="50"
+               VerticalOptions="StartAndExpand"
+               HorizontalOptions="CenterAndExpand" />
+        <Entry
+            x:Name="email"
+            Placeholder="Email"
+            PlaceholderColor="Gray"
+            ClearButtonVisibility="WhileEditing"
+            VerticalOptions="StartAndExpand"
+        />
+        <Entry 
+            x:Name="password"
+            Placeholder="Password"
+            IsPassword="True"
+            PlaceholderColor="Gray"
+            ClearButtonVisibility="WhileEditing"
+            VerticalOptions="StartAndExpand"
+        />
+        <Button 
+            Text="Sign In" 
+            Clicked="OnSignInClicked"
+            WidthRequest="200"
+            HeightRequest="80"
+            VerticalOptions="StartAndExpand"
+        />
+        <Button 
+            Text="Don't have an account? Sign Up" 
+            Clicked="NavToRegister"
+            BackgroundColor="Transparent"
+            TextColor="Blue"
+            WidthRequest="200"
+            HeightRequest="80"
+            VerticalOptions="StartAndExpand"
+        />
+    </StackLayout>
+</ContentPage>

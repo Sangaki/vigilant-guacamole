@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>9</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DebugType>pdbonly</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1-beta1" />
+        <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
+        <PackageReference Include="Xamarin.Forms" Version="5.0.0.1931" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="ViewModels\Login.xaml.cs">
+        <DependentUpon>Login.xaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="ViewModels\Register.xaml.cs">
+        <DependentUpon>Register.xaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="ViewModels\Tasks.xaml.cs">
+        <DependentUpon>Tasks.xaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="ViewModels\Settings.xaml.cs">
+        <DependentUpon>Settings.xaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="ViewModels\TasksFlyoutSide.xaml.cs">
+        <DependentUpon>TasksFlyoutSide.xaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Components\TaskView.xaml.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>TaskView.xaml</DependentUpon>
+      </Compile>
+    </ItemGroup>
+</Project>
